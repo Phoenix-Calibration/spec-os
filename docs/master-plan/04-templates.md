@@ -73,6 +73,16 @@ backend:
   error-handling:
     description: Error types, exception patterns, API error responses
     keywords: [error, exception, handling, response, status-code]
+  # Stack-specific — created by /spec-os-init based on config.yaml stack
+  dotnet:
+    description: .NET/C# patterns, async, DI, EF Core, Result<T>, exception strategy
+    keywords: [dotnet, csharp, net, aspnet, ef, entityframework, linq]
+  python:
+    description: Python patterns, type hints, async, Pydantic, error handling
+    keywords: [python, fastapi, django, sqlalchemy, pydantic, async]
+  odoo:
+    description: Odoo module patterns, ORM, views, wizards, inheritance
+    keywords: [odoo, orm, module, wizard, inherit, manifest]
 
 frontend:
   components:
@@ -84,6 +94,13 @@ frontend:
   testing:
     description: Component tests, e2e, selectors
     keywords: [test, cypress, playwright, data-testid]
+  # Stack-specific — created by /spec-os-init based on config.yaml stack
+  nextjs:
+    description: Next.js patterns, App Router, SSR/SSG, data fetching, routing
+    keywords: [nextjs, next, ssr, ssg, app-router, pages, server-component]
+  react:
+    description: React patterns, hooks, state, component composition, performance
+    keywords: [react, hooks, component, props, state, context, memo]
 ```
 
 ---
@@ -100,6 +117,7 @@ status: planned | in-progress | in-review | done | abandoned
 domain: {domain-name}
 stack: dotnet | odoo | nextjs | python | other
 cross-repo: false | true
+spec-level: lite | full
 spec-os-version: {version}
 created: {ISO-date}
 last-updated: {ISO-date}
@@ -109,11 +127,39 @@ last-updated: {ISO-date}
 | Type | ID | Title | URL |
 |------|----|-------|-----|
 
+## Scope
+
+### In scope
+
+### Out of scope
+
+## Requirements
+
+> Spec rules: describe observable behavior only — inputs, outputs, states, transitions.
+> Do not include class names, library choices, or implementation steps (those belong in tasks.md).
+> Use RFC 2119 keywords to communicate requirement strength:
+> MUST / SHALL = absolute | SHOULD = recommended, exceptions exist | MAY = optional
+
+### Requirement: {name}
+The system MUST | SHOULD | MAY {observable behavior}.
+
+#### Scenario: {happy path name}
+- GIVEN {precondition}
+- WHEN {action}
+- THEN {observable outcome}
+
+#### Scenario: {edge case or failure name}
+- GIVEN {precondition}
+- WHEN {action}
+- THEN {observable outcome}
+
+## Domain model
+{Entities, states, and transitions visible at the domain boundary.
+Not DB schema — domain concepts and their valid states/transitions.}
+
 ## Design decisions
-
-## Data model
-
-## Implementation scope
+{Architectural decisions that affect observable contracts: API shape, event schema,
+integration points. Not internal implementation choices.}
 
 ## Dependencies
 

@@ -6,6 +6,13 @@ Complete reference for all `/spec-os-*` skills. For workflow patterns and when t
 
 ## Quick Reference
 
+### Setup Skills — Project Initialization (run once, in this order)
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-product` | Create and maintain product documentation (mission.md, roadmap.md, design/) |
+| `/spec-os-init` | Install spec-os framework structure in a project (spec-os/, .claude/, skills) |
+
 ### Portfolio Skills — Cross-Repo (Claude Desktop personal skill)
 
 | Skill | Purpose |
@@ -39,6 +46,91 @@ Complete reference for all `/spec-os-*` skills. For workflow patterns and when t
 ---
 
 ## Skill Reference
+
+---
+
+### `/spec-os-product`
+
+Create and maintain product documentation. Runs before `/spec-os-init` so the framework has product context at setup time. Owns `docs/` entirely.
+
+**Syntax:**
+```
+/spec-os-product [mode]
+```
+
+**Arguments:**
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `mode` | No | `initialize` \| `generate` \| `update` (detected automatically if not provided) |
+
+**Modes:**
+
+**Initialize** — new project, no existing code:
+- Conversational: asks about product purpose, target audience, key problems solved
+- Generates `docs/mission.md` from conversation
+- Generates `docs/roadmap.md` as strategic north star (potential features, not commitments)
+- Creates `docs/design/` structure stubs, `docs/runbooks/`, `docs/manual/`
+- Notifies dev to run `/spec-os-init` next
+
+**Generate** — existing project being adopted:
+- Scans codebase: README files, existing docs, namespaces, module names, API endpoints
+- Proposes `mission.md` content derived from what the code actually does
+- Proposes `roadmap.md` with potential improvements or features observed in codebase
+- Dev reviews and approves each section before writing
+
+**Update** — update specific section:
+- Reads existing `mission.md` or `roadmap.md`
+- Proposes targeted updates to specific sections
+- Dev approves before writing
+
+**What it does NOT do:** touch `spec-os/` or `.claude/` — those are owned by `/spec-os-init`.
+
+**Example:**
+```
+You: /spec-os-product
+
+AI:  No docs/ folder found. Mode: INITIALIZE
+
+     Tell me about this product:
+     - What problem does it solve?
+     - Who uses it?
+     - What makes it different from alternatives?
+
+You: It's an equipment management system for industrial facilities.
+     Operators track equipment status, maintenance history, and calibration.
+     The main pain point is reactive maintenance — we want to shift to predictive.
+
+AI:  Drafting mission.md...
+
+     ## Purpose
+     Equipment management platform for industrial facilities, enabling
+     operations teams to shift from reactive to predictive maintenance.
+
+     ## Audience
+     Equipment operators, maintenance technicians, facility managers.
+
+     ## Problem solved
+     Reactive maintenance causes unplanned downtime. This system provides
+     real-time status visibility, maintenance history, and early-warning signals.
+
+     Approve this content? [y/n]
+
+You: y
+
+AI:  Written: docs/mission.md
+
+     Now let's define the strategic roadmap...
+     [generates roadmap.md with potential future features]
+
+     Created:
+     docs/mission.md
+     docs/roadmap.md
+     docs/design/  (structure stubs)
+     docs/runbooks/
+     docs/manual/
+
+     Next: run /spec-os-init to install the framework.
+```
 
 ---
 
@@ -255,18 +347,20 @@ Initialize spec-os in a new project, adopt it in an existing project, or update 
 **Modes:**
 
 **Initialize** — new project, no existing code:
+- Reads `docs/mission.md` optionally → seeds project description in `config.yaml` and `CLAUDE.md`
 - Creates complete `spec-os/` structure
 - Asks developer to declare domains → creates `spec-os/specs/_index.md` + stubs
 - Creates `.claude/CLAUDE.md` (thin template)
 - Creates `.claude/skills/spec-os-*/SKILL.md` for all skills
-- Creates `docs/` structure (design, domains, runbooks, manual)
 - Creates `spec-os/version` with current version
+- Does NOT create `docs/` — owned by `/spec-os-product`
 
 **Adopt** — existing project:
 - Scans codebase to identify bounded contexts, modules, namespaces
 - Proposes domain list → dev confirms/edits
 - Creates `spec-os/` structure + domain stubs seeded from existing code
-- Generates specialist subagents (backend-dev, frontend-dev) via Skill Creator based on detected stack
+- Creates `spec-os/agents/backend-dev.md` and `frontend-dev.md` (internal agent identities)
+- Creates stack-specific standard stubs in `spec-os/standards/` based on detected stack
 - Does NOT modify existing CLAUDE.md — proposes a replacement for dev approval
 
 **Update** — spec-os already installed, new version available:
@@ -326,6 +420,7 @@ Create the technical specification for a feature, starting from `origin.md` or a
 - Reads `origin.md` from the changes folder (or asks for tracker Feature ID)
 - Reads tracker Feature via adapter (full context, AC, linked items)
 - Reads `docs/design/00-overview.md` + domain design file
+- **Guards:** validates `docs/design/` exists — stops if not found, instructs dev to run `/spec-os-product` first
 - **Guards:** validates domain exists in `spec-os/specs/_index.md` — stops if not found
 - **Guards:** checks for conflicts in `spec-os/changes/` (same feature already in progress)
 - Creates feature folder with: `spec.md`, `spec-delta.md` (empty), `session-log.md` (empty), `verify-report.md` (empty)
@@ -443,12 +538,16 @@ INIT:
 
 LOAD: Context by tier (1 always; 2-3 per task's context-level)
 
-STANDARDS: Invoke /spec-os-inject with task keywords and subagent type
+STANDARDS: Invoke /spec-os-inject with task keywords + stack from spec.md frontmatter
+           (loads both generic and stack-specific standards)
 
-CONFIRM: Identify specialist (backend-dev or frontend-dev)
+AGENT: Read spec-os/agents/{backend-dev | frontend-dev}.md
+       Build subagent context: agent identity + injected standards
+
+CONFIRM: Identify agent type (backend-dev or frontend-dev)
          Notify dev -> wait for approval [HANDOFF]
 
-EXECUTE: Invoke specialist subagent
+EXECUTE: Invoke Agent tool with combined context (runs in isolated subagent context)
 
 RECONCILE:
   1. git diff -- spec.md: if changed -> propose /spec-os-create Update [HANDOFF]
@@ -647,7 +746,7 @@ Sync pending lessons from session logs to knowledge-base. Always the last skill 
 - Validates domain tags against `spec-os/specs/_index.md`
 - Proposes formatted entries for `knowledge-base.md` with proper tags
 - Dev approves additions
-- Writes to `knowledge-base.md`
+- Writes to `spec-os/specs/knowledge-base.md`
 - Marks lessons as synced in session-log
 - Checks archival: asks dev to confirm if Feature is done in tracker → moves to `changes/archive/`
 
@@ -720,11 +819,11 @@ Clean up outdated or superseded entries from `knowledge-base.md`.
 | `domain` | No | Domain tag to prune (prunes all domains if not provided) |
 
 **What it does:**
-- Reads `knowledge-base.md`
+- Reads `spec-os/specs/knowledge-base.md`
 - Identifies entries that are outdated (patterns no longer used, superseded decisions, stale gotchas)
 - Proposes specific removals or updates with rationale
 - Dev approves each change
-- Writes updated `knowledge-base.md`
+- Writes updated `spec-os/specs/knowledge-base.md`
 
 **Tips:**
 - Run periodically (e.g. after major refactors or architecture changes)

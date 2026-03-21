@@ -67,6 +67,11 @@ New layer. Makes every skill tracker-agnostic.
 +-- spec-os/                           <- FRAMEWORK LAYER
 |   +-- config.yaml                    <- tracker, workflow, project metadata
 |   +-- version                        <- spec-os semver string (e.g. 1.0.0)
+|   +-- GETTING-STARTED.md             <- how to use spec-os in this project
+|   |
+|   +-- agents/                        <- internal agent identities (not skills)
+|   |   +-- backend-dev.md             <- backend subagent identity + behavioral rules
+|   |   +-- frontend-dev.md            <- frontend subagent identity + behavioral rules
 |   |
 |   +-- standards/                     <- LAYER 1: How we build
 |   |   +-- index.yml                  <- keyword -> file mapping
@@ -80,13 +85,16 @@ New layer. Makes every skill tracker-agnostic.
 |   |   |   +-- patterns.md
 |   |   |   +-- testing.md
 |   |   |   +-- error-handling.md
+|   |   |   +-- {stack}.md             <- stack-specific: dotnet.md | python.md | odoo.md
 |   |   +-- frontend/
 |   |       +-- components.md
 |   |       +-- state.md
 |   |       +-- testing.md
+|   |       +-- {stack}.md             <- stack-specific: nextjs.md | react.md
 |   |
 |   +-- specs/                         <- LAYER 2: Source of truth
 |   |   +-- _index.md                  <- domains list + relationships (authoritative registry)
+|   |   +-- knowledge-base.md          <- institutional lessons (tagged, cross-domain)
 |   |   +-- {domain}/
 |   |       +-- spec.md
 |   |
@@ -101,22 +109,20 @@ New layer. Makes every skill tracker-agnostic.
 |       +-- archive/
 |           +-- {YYYY-MM-DD}-{feature}/
 |
-+-- docs/                              <- HUMAN + AGENT DOCUMENTATION
-|   +-- README.md
-|   +-- GETTING-STARTED.md
-|   +-- ROADMAP.md
-|   +-- knowledge-base.md              <- institutional lessons (tagged)
-|   +-- master-plan/                   <- spec-os design documentation (this folder)
++-- docs/                              <- PRODUCT DOCUMENTATION (stable, rarely changes)
+|   +-- mission.md                     <- product purpose, audience, problem solved
+|   +-- roadmap.md                     <- strategic north star, potential future features
 |   +-- design/
 |   |   +-- 00-overview.md through 09-design-system.md
 |   |   +-- adr/
-|   +-- domains/
 |   +-- runbooks/
 |   +-- manual/
 |
 +-- .claude/
     +-- CLAUDE.md                      <- thin: identity + pointers only
     +-- skills/
+        +-- spec-os-product/           <- /spec-os-product (also ~/.claude/skills/)
+        |   +-- SKILL.md
         +-- spec-os-brainstorm/        <- /spec-os-brainstorm (also ~/.claude/skills/)
         |   +-- SKILL.md
         +-- spec-os-init/              <- /spec-os-init
@@ -133,11 +139,6 @@ New layer. Makes every skill tracker-agnostic.
         |   +-- SKILL.md
         +-- spec-os-implement/         <- /spec-os-implement
         |   +-- SKILL.md
-        |   +-- specialists/
-        |       +-- backend-dev/
-        |       |   +-- SKILL.md
-        |       +-- frontend-dev/
-        |           +-- SKILL.md
         +-- spec-os-verify/            <- /spec-os-verify
         |   +-- SKILL.md
         +-- spec-os-abandon/           <- /spec-os-abandon   NEW

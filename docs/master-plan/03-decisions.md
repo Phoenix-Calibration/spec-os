@@ -47,7 +47,7 @@ TIER 2 (most tasks, +10-20KB):
 
 TIER 3 (complex tasks, +20-40KB):
   - Full spec.md (or specific sections)
-  - knowledge-base.md filtered by domain + stack tags
+  - spec-os/specs/knowledge-base.md filtered by domain + stack tags
   - Relevant ADRs from docs/design/adr/ if referenced in spec.md
 ```
 
@@ -261,7 +261,7 @@ Complex bugs: `/spec-os-bug` creates `analysis.md` → dev reviews → `/spec-os
 
 ### Decision 17: knowledge-base Tag Schema with _index.md Validation
 
-**Problem:** knowledge-base.md needs tags for smart filtering, but free-form domain tags risk inconsistency.
+**Problem:** `spec-os/specs/knowledge-base.md` needs tags for smart filtering, but free-form domain tags risk inconsistency.
 **Solution:** Fixed global schema with `domain` tag validated against `spec-os/specs/_index.md`.
 
 ```
@@ -271,7 +271,7 @@ layer:  [domain, application, infrastructure, presentation, global]
 type:   [pattern, gotcha, anti-pattern, performance, security]
 ```
 
-`/spec-os-sync` validates domain tag exists in `_index.md` before writing. No separate configuration needed — the domain registry already exists.
+`/spec-os-sync` validates domain tag exists in `_index.md` before writing to `spec-os/specs/knowledge-base.md`. No separate configuration needed — the domain registry already exists.
 
 ---
 
@@ -368,6 +368,137 @@ Epic                ← spec-os-explore creates (optional — when initiative wa
 **Relationship to spec-os-brainstorm:**
 
 `spec-os-explore` outputs are *context packages*, not `origin.md`. The `{timestamp}-initiative-{slug}-{app}.md` files are input to brainstorm, which produces the authoritative `origin.md` per project. The two skills are complementary, not overlapping.
+
+---
+
+### Decision 21: Progressive Rigor — spec-level Tied to context-level
+
+**Problem:** `context-level` in tasks.md controlled how much context Claude loads at implementation time, but there was no explicit criterion for when a feature needs a lite vs full spec. `/spec-os-plan` assigned context-level without a documented rationale.
+
+**Solution:** Introduce `spec-level: lite | full` in `spec.md` frontmatter (set by `/spec-os-create`) and tie it explicitly to `context-level` (set by `/spec-os-plan`). Use the lightest spec level that still makes the change verifiable.
+
+```
+spec-level: lite  →  context-level: 1
+spec-level: full  →  context-level: 2 or 3
+```
+
+**Criteria for spec-level assignment (used by `/spec-os-create`):**
+
+| Condition | spec-level |
+|-----------|-----------|
+| Bug fix, single-file scope, no behavior contract change | lite |
+| Internal refactor with no observable behavior change | lite |
+| New feature, bounded scope, single domain | full (context-level: 2) |
+| Cross-repo change, API/event contract, migration | full (context-level: 3) |
+| Security, privacy, or compliance impact | full (context-level: 3) |
+| High ambiguity — likely to cause expensive rework if wrong | full (context-level: 3) |
+
+**What lite spec means in practice:**
+- `spec.md` has Scope + 1-3 Requirements with scenarios
+- No Domain model section needed
+- `/spec-os-verify` checks observable behavior against scenarios only
+
+**What full spec means in practice:**
+- `spec.md` has all sections: Scope, Requirements (with RFC 2119), Domain model, Design decisions
+- `/spec-os-verify` checks all sections including domain model consistency
+- context-level: 3 also loads ADRs and full spec-os/specs/knowledge-base.md filter
+
+**RFC 2119 keywords apply in both levels:**
+`MUST`/`SHALL` = absolute requirement (FAIL if not met in verify)
+`SHOULD` = recommended (WARNING if not met in verify)
+`MAY` = optional (not checked by verify)
+
+---
+
+### Decision 22: spec-os-product Owns docs/ — Runs Before spec-os-init
+
+**Problem:** `/spec-os-init` mixed framework scaffolding (`spec-os/`, `.claude/`) with product documentation creation (`docs/`), two responsibilities with fundamentally different triggers, update cycles, and analysis requirements. Product docs require business thinking; framework setup requires technical configuration.
+
+**Solution:** Extract product documentation into a dedicated skill `/spec-os-product` that runs before `/spec-os-init`, giving the framework product context at setup time.
+
+**Setup order:**
+```
+/spec-os-product → /spec-os-init → ready for /spec-os-brainstorm
+```
+
+**Responsibility split:**
+
+| Skill | Owns | Does NOT touch |
+|-------|------|----------------|
+| `/spec-os-product` | `docs/` entirely: mission.md, roadmap.md, design/, runbooks/, manual/ | spec-os/, .claude/ |
+| `/spec-os-init` | `spec-os/` + `.claude/` entirely | docs/ |
+| `/spec-os-discover` + `/spec-os-standard` | `spec-os/standards/` | everything else |
+
+**How spec-os-init uses product context:**
+- Reads `docs/mission.md` to seed project description in `config.yaml` and `CLAUDE.md` (optional — continues without it)
+- Adopt mode: reads `mission.md` to better identify domain boundaries from product context
+
+**spec-os-product modes:**
+- **Initialize:** conversational → generates `mission.md` + `roadmap.md` + `docs/` structure from scratch
+- **Generate:** scans existing codebase and docs → proposes content → dev approves
+- **Update:** reads existing docs → proposes specific section updates → dev approves
+
+**Guard added to spec-os-create:**
+Validates `docs/design/` exists before creating spec. Stops if not found and instructs dev to run `/spec-os-product` first. Consistent with the domain guard pattern (Decision 16).
+
+---
+
+### Decision 23: Specialist Subagents as Internal Agents + Stack-Specific Standards
+
+**Problem:** Specialists (`backend-dev`, `frontend-dev`) were organized as nested SKILL.md files inside `.claude/skills/spec-os-implement/specialists/`. Claude Code skill discovery is flat — nested skills are not reliably discovered. Additionally, specialist knowledge was hardcoded in SKILL.md files, outside the standards management system (`/spec-os-discover`, `/spec-os-standard`).
+
+**Solution — Two-part change:**
+
+**Part 1 — Specialists move to `spec-os/agents/`:**
+Thin identity files (not skills) read by `/spec-os-implement` and passed as system prompts when invoking the Agent tool. Never registered as invocable skills. Lives in `spec-os/` alongside other framework artifacts.
+
+```
+spec-os/agents/
+├── backend-dev.md    ← agent identity + universal behavioral rules
+└── frontend-dev.md   ← agent identity + universal behavioral rules
+```
+
+`spec-os/agents/{type}.md` contains:
+- Agent identity and role
+- Universal behavioral rules (scope, commits, propose before implement)
+- Instruction to apply injected standards as execution constraints
+- Does NOT contain stack-specific knowledge
+
+**Part 2 — Stack-specific knowledge moves to standards:**
+
+```
+spec-os/standards/
+├── backend/
+│   ├── architecture.md    ← existing
+│   ├── patterns.md        ← existing
+│   ├── testing.md         ← existing
+│   ├── error-handling.md  ← existing
+│   ├── dotnet.md          ← NEW — stack-specific
+│   ├── python.md          ← NEW — stack-specific
+│   └── odoo.md            ← NEW — stack-specific
+└── frontend/
+    ├── components.md      ← existing
+    ├── state.md           ← existing
+    ├── testing.md         ← existing
+    ├── nextjs.md          ← NEW — stack-specific
+    └── react.md           ← NEW — stack-specific
+```
+
+Managed by `/spec-os-discover` (scan) and `/spec-os-standard` (update) like all other standards.
+
+**How `/spec-os-implement` uses this:**
+```
+LOAD:   /spec-os-inject → loads standards matching task keywords + stack from spec.md
+AGENT:  reads spec-os/agents/{backend-dev | frontend-dev}.md
+        builds subagent context: agent identity + injected standards
+        invokes Agent tool with combined context → executes task in isolated context
+```
+
+**`/spec-os-init` creates:**
+- `spec-os/agents/backend-dev.md` and `frontend-dev.md` (always)
+- Stack-specific standard stubs based on `stack` field in `config.yaml`
+
+**Result:** Subagents preserved (context isolation, parallel execution). Knowledge managed through standards. No nested skill folders. `/spec-os-inject` gains stack-awareness by also reading `stack` from `spec.md` frontmatter.
 
 ---
 

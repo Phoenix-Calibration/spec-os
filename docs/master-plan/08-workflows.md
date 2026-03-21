@@ -39,7 +39,8 @@ There are three ways to start a session. Pick based on what you have:
 |-----------|-------------|
 | New idea, requirement, or business request | `/spec-os-brainstorm` |
 | Bug reported in tracker (ADO issue, GitHub issue) | `/spec-os-bug [id]` |
-| Setting up spec-os in a project | `/spec-os-init` |
+| Setting up product documentation (first time or update) | `/spec-os-product` |
+| Installing spec-os framework in a project | `/spec-os-init` (after `/spec-os-product`) |
 
 All other skills (`/spec-os-create`, `/spec-os-plan`, `/spec-os-implement`, etc.) are reached via handoffs from these entry points — or invoked directly if you are continuing a session that was interrupted.
 
@@ -408,7 +409,8 @@ If a feature is cancelled, run `/spec-os-abandon`. It updates tracker status, mo
 |-----------|-------|
 | New idea or requirement | `/spec-os-brainstorm` |
 | Bug from tracker | `/spec-os-bug [id]` |
-| Set up spec-os | `/spec-os-init` |
+| Set up product docs (mission, roadmap, design) | `/spec-os-product` |
+| Install spec-os framework | `/spec-os-init` (after `/spec-os-product`) |
 | Create spec from origin.md | `/spec-os-create` |
 | Decompose spec into tasks | `/spec-os-plan` |
 | Implement one task | `/spec-os-implement [task-id]` |
