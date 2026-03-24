@@ -161,8 +161,10 @@ workflow:
 
 ### Decision 9: doc-update Conditional Invocation
 
-**Problem:** `doc-update` always runs even for pure-backend tasks with no UX change
-**Solution:** `/spec-os-plan` marks tasks with `ux-impact: true | false`. `/spec-os-verify` only invokes `/spec-os-doc` if at least one task in the US has `ux-impact: true`.
+**Problem:** `doc-update` always runs even for backend tasks with no observable user-facing change
+**Solution:** `/spec-os-plan` marks tasks with `doc-impact: true | false`. `/spec-os-verify` only invokes `/spec-os-doc` if at least one task in the US has `doc-impact: true`.
+
+`doc-impact: true` applies to: UI/UX changes, API contract changes visible to consumers, business rule changes observable by users, permission or role changes. Not limited to visual UI — any change an end user or integrating team needs to know about.
 
 ---
 
@@ -184,16 +186,16 @@ project:
 **Solution:** `skill-handoffs: explicit` is the default in `config.yaml`. Every skill-to-skill transition pauses and notifies the developer before proceeding.
 
 Complete handoff map (all require dev confirmation in v1):
-- `/spec-os-brainstorm` → `/spec-os-create`
+- `/spec-os-brainstorm` → `/spec-os-design`
 - `/spec-os-bug` → `/spec-os-implement` (simple path)
-- `/spec-os-create` → `/spec-os-plan`
+- `/spec-os-design` → `/spec-os-plan`
 - `/spec-os-plan` → `/spec-os-implement` T01
 - `/spec-os-implement` → `/spec-os-verify` (on US complete)
-- `/spec-os-verify` → `/spec-os-doc` (on PASS + ux-impact)
+- `/spec-os-verify` → `/spec-os-doc` (on PASS + doc-impact)
 - `/spec-os-verify` → `/spec-os-implement` (on FAIL)
 - `/spec-os-doc` → `/spec-os-sync` (always last, always explicit)
 
-`/spec-os-create` Update mode and `/spec-os-plan` Update mode (invoked during RECONCILE) are also explicit — they propose changes and wait for dev approval before writing.
+`/spec-os-design` Update mode and `/spec-os-plan` Update mode (invoked during RECONCILE) are also explicit — they propose changes and wait for dev approval before writing.
 
 ---
 
@@ -248,14 +250,14 @@ Complex bugs: `/spec-os-bug` creates `analysis.md` → dev reviews → `/spec-os
 
 ### Decision 16: project-init as Owner of Domain Specs
 
-**Problem:** `spec-os/specs/{domain}/spec.md` files need to exist before `/spec-os-create` runs, but had no defined creation mechanism.
+**Problem:** `spec-os/specs/{domain}/spec.md` files need to exist before `/spec-os-design` runs, but had no defined creation mechanism.
 **Solution:** `/spec-os-init` is the sole owner of domain spec creation across all three modes.
 
 - **Initialize:** dev declares domains → creates `_index.md` + stubs per domain
 - **Adopt:** scans codebase (namespaces, modules, bounded contexts) → proposes domain list → dev confirms → creates `_index.md` + stubs seeded from existing code
 - **Update:** adds new domains post-adoption
 
-`/spec-os-create` has a hard guard: validates domain exists in `_index.md`. If not → stops with clear instruction to run `/spec-os-init Update`.
+`/spec-os-design` has a hard guard: validates domain exists in `_index.md`. If not → stops with clear instruction to run `/spec-os-init Update`.
 
 ---
 
@@ -280,11 +282,11 @@ type:   [pattern, gotcha, anti-pattern, performance, security]
 **Problem:** spec-evolve was a middleman skill with no clear ownership — it updated spec.md (owned by spec-create) and affected tasks.md (owned by spec-plan).
 **Solution:** Each skill owns its artifact across its full lifecycle, including updates.
 
-- **`/spec-os-create`** owns spec.md + spec-delta.md for the entire feature lifecycle (create + update)
+- **`/spec-os-design`** owns spec.md + spec-delta.md for the entire feature lifecycle (create + update)
 - **`/spec-os-plan`** owns tasks.md for the entire feature lifecycle (create + update)
 - **`/spec-os-implement`** orchestrates via a RECONCILE step after each EXECUTE:
-  1. `git diff` check on spec.md — if changed by dev → invokes `/spec-os-create` Update mode
-  2. Reasoning check — "Did implementation reveal anything undocumented in spec.md?" → invokes `/spec-os-create` Update mode if yes
+  1. `git diff` check on spec.md — if changed by dev → invokes `/spec-os-design` Update mode
+  2. Reasoning check — "Did implementation reveal anything undocumented in spec.md?" → invokes `/spec-os-design` Update mode if yes
   3. If spec change affects tasks → invokes `/spec-os-plan` Update mode
 
 Both Update modes are dev-assisted: they propose changes, dev approves before writing. Neither runs silently.
@@ -382,7 +384,7 @@ spec-level: lite  →  context-level: 1
 spec-level: full  →  context-level: 2 or 3
 ```
 
-**Criteria for spec-level assignment (used by `/spec-os-create`):**
+**Criteria for spec-level assignment (used by `/spec-os-design`):**
 
 | Condition | spec-level |
 |-----------|-----------|
@@ -438,31 +440,49 @@ spec-level: full  →  context-level: 2 or 3
 - **Generate:** scans existing codebase and docs → proposes content → dev approves
 - **Update:** reads existing docs → proposes specific section updates → dev approves
 
-**Guard added to spec-os-create:**
+**Guard added to spec-os-design:**
 Validates `docs/design/` exists before creating spec. Stops if not found and instructs dev to run `/spec-os-product` first. Consistent with the domain guard pattern (Decision 16).
 
 ---
 
-### Decision 23: Specialist Subagents as Internal Agents + Stack-Specific Standards
+### Decision 23: Specialist Subagents as Native Claude Code Agents + Stack-Specific Standards
 
 **Problem:** Specialists (`backend-dev`, `frontend-dev`) were organized as nested SKILL.md files inside `.claude/skills/spec-os-implement/specialists/`. Claude Code skill discovery is flat — nested skills are not reliably discovered. Additionally, specialist knowledge was hardcoded in SKILL.md files, outside the standards management system (`/spec-os-discover`, `/spec-os-standard`).
 
 **Solution — Two-part change:**
 
-**Part 1 — Specialists move to `spec-os/agents/`:**
-Thin identity files (not skills) read by `/spec-os-implement` and passed as system prompts when invoking the Agent tool. Never registered as invocable skills. Lives in `spec-os/` alongside other framework artifacts.
+**Part 1 — Specialists move to `.claude/agents/`:**
+Native Claude Code subagent definitions (Markdown + YAML frontmatter). Read and invoked by `/spec-os-implement` using the Agent tool. Never registered as invocable skills — they are executors, not entry points. Skills remain the orchestrators.
 
 ```
-spec-os/agents/
-├── backend-dev.md    ← agent identity + universal behavioral rules
-└── frontend-dev.md   ← agent identity + universal behavioral rules
+.claude/agents/
+├── backend-dev.md    ← native subagent: YAML frontmatter + system prompt
+└── frontend-dev.md   ← native subagent: YAML frontmatter + system prompt
 ```
 
-`spec-os/agents/{type}.md` contains:
+`.claude/agents/{type}.md` YAML frontmatter:
+```yaml
+---
+name: backend-dev
+description: Backend specialist invoked by /spec-os-implement. Not for direct use.
+tools: Read, Edit, Write, Bash, Grep, Glob
+model: sonnet
+---
+```
+
+Body contains:
 - Agent identity and role
 - Universal behavioral rules (scope, commits, propose before implement)
 - Instruction to apply injected standards as execution constraints
 - Does NOT contain stack-specific knowledge
+
+**Why `.claude/agents/` over `spec-os/agents/`:**
+- Native Claude Code path — `tools` and `model` fields are enforced by the platform
+- Tool restriction: agents cannot use Agent tool (no nested subagents) — enforced natively
+- Discoverable via `/agents` command
+- Version-controlled alongside skills in `.claude/`
+
+**Skills remain orchestrators (v1 philosophy):** `/spec-os-implement` (skill) controls all approval gates, context loading, and handoffs. Agents are executors with no decision authority over the workflow.
 
 **Part 2 — Stack-specific knowledge moves to standards:**
 
@@ -489,16 +509,16 @@ Managed by `/spec-os-discover` (scan) and `/spec-os-standard` (update) like all 
 **How `/spec-os-implement` uses this:**
 ```
 LOAD:   /spec-os-inject → loads standards matching task keywords + stack from spec.md
-AGENT:  reads spec-os/agents/{backend-dev | frontend-dev}.md
-        builds subagent context: agent identity + injected standards
-        invokes Agent tool with combined context → executes task in isolated context
+AGENT:  invokes .claude/agents/{backend-dev | frontend-dev} via Agent tool
+        passes injected standards as additional context
+        agent executes task in isolated context with restricted tool access
 ```
 
 **`/spec-os-init` creates:**
-- `spec-os/agents/backend-dev.md` and `frontend-dev.md` (always)
+- `.claude/agents/backend-dev.md` and `frontend-dev.md` (always, with YAML frontmatter)
 - Stack-specific standard stubs based on `stack` field in `config.yaml`
 
-**Result:** Subagents preserved (context isolation, parallel execution). Knowledge managed through standards. No nested skill folders. `/spec-os-inject` gains stack-awareness by also reading `stack` from `spec.md` frontmatter.
+**Result:** Subagents are native Claude Code agents with enforced tool restrictions and model selection. Knowledge managed through standards. Skills remain the explicit orchestrators that developers invoke. `/spec-os-inject` gains stack-awareness by also reading `stack` from `spec.md` frontmatter.
 
 ---
 
@@ -535,3 +555,152 @@ Screenshots excluded. Template is 100% auto-generated by `/spec-os-verify`. See 
 ### Gap H — CI/CD Integration [RESOLVED]
 
 Local test execution for v1. `/spec-os-verify` runs project test commands (`dotnet test`, `pytest`, `npm test`) directly. CI integration is a future enhancement.
+
+---
+
+### Decision 24: Inner Loop per Task in spec-os-implement
+
+**Problem:** No validation cycle existed between implementation and commit. Dev-agent could commit broken code with no automated feedback before the developer reviewed.
+
+**Solution:** An inner loop wraps each EXECUTE phase:
+
+```
+test-writer proposes test gaps [gate: dev approves]
+dev-agent implements code + approved tests → commits
+test-runner runs unit tests
+  PASS → exit loop
+  FAIL → dev-agent corrects → loop
+  max-iterations exhausted → [gate: dev decides]
+```
+
+`max-iterations` is configurable in `config.yaml` under `implement.max-iterations` (default: 3). dev-agent performs the commit as the last step of its own EXECUTE — the skill does not commit on its behalf.
+
+---
+
+### Decision 25: test-writer Bounded by spec.md
+
+**Problem:** Unconstrained test generation produces redundant tests and inflates scope without adding coverage value.
+
+**Solution:** test-writer operates under two constraints:
+
+1. **Audit first** — reads existing test files declared in `test-scope` field of tasks.md before proposing anything
+2. **One test per gap** — maximum one test per AC scenario that has no prior coverage
+
+Before writing a single line, test-writer proposes a list with justification per test (which AC scenario it covers, why existing tests don't cover it). Developer approves the list [gate] before any test is written.
+
+`test-scope` is a new field in `tasks.md`, set by `/spec-os-plan`, that lists existing test files relevant to the task (or `none`).
+
+---
+
+### Decision 26: spec-reconciler as Read-Only Agent
+
+**Problem:** RECONCILE logic inside `/spec-os-implement` was complex and required file analysis that benefited from an isolated, focused context. Mixing reconciliation reasoning with orchestration reasoning in the same session degraded quality.
+
+**Solution:** RECONCILE is delegated to a dedicated `spec-reconciler` agent with tool restriction: Read, Grep, Glob only. It cannot write anything.
+
+spec-reconciler runs after the inner loop exits (PASS), before REVIEW. It checks:
+1. `git diff -- spec.md` — did the developer modify spec.md directly?
+2. Reasoning scan — does the implementation reveal behavior undocumented in spec.md?
+
+Results are returned to `/spec-os-implement`, which owns all gates and handoffs.
+
+**Standalone mode:** `/spec-os-implement reconcile [task-id]` — runs only RECONCILE on a completed task (useful when dev suspects drift after the session).
+
+**Unclaim mode:** `/spec-os-implement unclaim [task-id]` — releases `claimed-by` field. Use when a developer abandons a task mid-session without completing it.
+
+---
+
+### Decision 27: /spec-os-sync Runs at PR Creation
+
+**Problem:** sync was triggered at US completion, but the natural sync moment is when the PR is created — work is done and validated.
+
+**Solution:** `/spec-os-sync` runs automatically after verify PASS + PR created. It is:
+- **Lesson sync only** — reads lessons with `pending: true` from session-log.md, writes to knowledge-base.md
+- **Idempotent** — skips lessons already marked `pending: false`
+- **No archival** — archival responsibility moved entirely to `/spec-os-clean` (Decision 28)
+
+---
+
+### Decision 28: Archival Moves to /spec-os-clean
+
+**Problem:** `/spec-os-sync` mixed two concerns: lesson sync (happens after every US) and feature archival (happens at release close). Different triggers, different frequencies, different risk levels.
+
+**Solution:** `/spec-os-clean` owns both maintenance responsibilities:
+1. **Knowledge-base cleanup** — scans `spec-os/specs/knowledge-base.md` for obsolete, contradictory, or superseded entries; proposes removals or updates [gate]
+2. **Feature archival** — moves completed features from `spec-os/changes/` to `spec-os/archive/` at sprint/release close [gate]
+
+Developer runs `/spec-os-clean` manually at the end of a release cycle. Not part of the daily workflow. Previous name `spec-os-prune` was renamed to `spec-os-clean` for clarity.
+
+---
+
+### Decision 29: code-reviewer Agent Eliminated
+
+**Problem:** A `code-reviewer` agent was considered to provide automated code review before COMMIT.
+
+**Decision:** Not implemented. The conventions check in `/spec-os-verify` (standards compliance against `spec-os/standards/`) already covers automated review of coding conventions. Architectural and business-logic judgment belongs to the human reviewer in the PR. Adding a code-reviewer agent between EXECUTE and COMMIT would add latency without adding value that either the standards check or the human reviewer doesn't already provide.
+
+---
+
+### Decision 30: T{NN} Tasks No Se Crean en el Tracker Externo
+
+**Problem:** Ambigüedad sobre si las tareas T{NN} de `tasks.md` debían crearse como work items en ADO/GitHub, generando riesgo de dos fuentes de verdad.
+
+**Decision — Modelo A: tasks.md es el único tracker de tareas:**
+
+Los T{NN} de `tasks.md` son el tracker de implementación de spec-os. No se crean como Task work items en ADO/GitHub. El tracker externo trackea solo a nivel de US (y superiores).
+
+**Razones:** dos fuentes de verdad generan desincronización; los ADO Tasks raramente se usan en la práctica; los campos de spec-os no mapean limpiamente a ADO Tasks.
+
+**Única concesión de visibilidad:** `/spec-os-implement` INIT agrega un comentario al tracker US cuando reclama una tarea: `"T{NN} in progress — {title} — {dev}"`. No crea un Task work item.
+
+`config.yaml` reserva `tracker.create-tasks: false` para v2.
+
+---
+
+### Status Lifecycle — Quién Actualiza Qué
+
+**tasks.md por tarea:**
+
+| Estado | Responsable | Momento |
+|--------|-------------|---------|
+| `planned` | `/spec-os-plan` | Al crear |
+| `in-progress` + `claimed-by: {dev}` | `/spec-os-implement` INIT | Al reclamar |
+| `done` + `claimed-by: —` | `/spec-os-implement` LOG | Al completar |
+| `abandoned` | `/spec-os-abandon` | Al abandonar |
+
+**spec.md status (frontmatter):**
+
+| Estado | Responsable | Momento |
+|--------|-------------|---------|
+| `planned` | `/spec-os-design` | Al crear |
+| `in-progress` | `/spec-os-implement` INIT | Solo cuando es la primera tarea del feature (spec.md status = planned) |
+| `in-review` | `/spec-os-verify` PASS | Antes de crear el PR |
+| `done` | `/spec-os-clean` | Durante archival |
+| `abandoned` | `/spec-os-abandon` | Al abandonar |
+
+**tasks.md status global (frontmatter):** se mueve en sync con spec.md — mismo dueño y momento.
+
+**Tracker User Story:**
+
+| Estado | Responsable | Momento |
+|--------|-------------|---------|
+| New | `/spec-os-plan` | Al crear en tracker |
+| Active | `/spec-os-implement` INIT | Primera tarea del feature (ningún task done previo) |
+| In Review | `/spec-os-verify` PASS | Al crear el PR |
+| Done/Closed | `/spec-os-clean` | Durante archival (valida PR mergeado) |
+| Cancelled | `/spec-os-abandon` | Explícitamente cada US hijo |
+
+**Tracker Feature:**
+
+| Estado | Responsable | Momento |
+|--------|-------------|---------|
+| Active | `/spec-os-brainstorm` | Al crear |
+| Done/Closed | `/spec-os-clean` | Durante archival |
+| Cancelled | `/spec-os-abandon` | Al abandonar |
+
+**Tracker Bug:**
+
+| Estado | Responsable | Momento |
+|--------|-------------|---------|
+| (fetched) | `/spec-os-bug` | Al triagear |
+| Resolved/Closed | `/spec-os-verify` PASS | Cuando feature-id empieza con `B` |

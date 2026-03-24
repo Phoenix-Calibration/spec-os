@@ -38,7 +38,15 @@ workflow:
   knowledge-sync:
     trigger: us-completion
   doc-update:
-    require-ux-impact: true
+    require-doc-impact: true
+
+ci:
+  provider: none              # none | github-actions | ado-pipelines
+  required-checks: []         # e.g. [build, test]
+  auto-merge-on-pass: false
+
+implement:
+  max-iterations: 3           # inner loop retries before escalating to developer
 ```
 
 ---
@@ -170,7 +178,7 @@ integration points. Not internal implementation choices.}
 - [ ] All AC verified by /spec-os-verify
 - [ ] PR created and linked to each US
 - [ ] Tracker US status updated to in-review
-- [ ] /spec-os-doc invoked (if ux-impact tasks exist)
+- [ ] /spec-os-doc invoked (if doc-impact tasks exist)
 ```
 
 ---
@@ -199,7 +207,8 @@ last-updated: {ISO-date}
 - scope: {file paths}
 - done-when: {verifiable criterion}
 - context-level: 1 | 2 | 3
-- ux-impact: true | false
+- doc-impact: true | false
+- test-scope: none | {paths to existing relevant test files}
 - claimed-by: —
 - status: planned | in-progress | blocked | done
 - blocked-reason: {if blocked}

@@ -541,13 +541,13 @@ LOAD: Context by tier (1 always; 2-3 per task's context-level)
 STANDARDS: Invoke /spec-os-inject with task keywords + stack from spec.md frontmatter
            (loads both generic and stack-specific standards)
 
-AGENT: Read spec-os/agents/{backend-dev | frontend-dev}.md
-       Build subagent context: agent identity + injected standards
+AGENT: Invoke .claude/agents/{backend-dev | frontend-dev} via Agent tool
+       Pass injected standards as additional context
 
 CONFIRM: Identify agent type (backend-dev or frontend-dev)
          Notify dev -> wait for approval [HANDOFF]
 
-EXECUTE: Invoke Agent tool with combined context (runs in isolated subagent context)
+EXECUTE: Agent tool runs .claude/agents/{type} in isolated subagent context
 
 RECONCILE:
   1. git diff -- spec.md: if changed -> propose /spec-os-create Update [HANDOFF]
