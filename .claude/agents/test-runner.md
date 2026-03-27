@@ -59,6 +59,6 @@ If result is PASS and no failures, omit the Failures section.
 
 ## What you do NOT own
 
-- Writing or modifying tests (owned by test-writer agent)
+- Writing or modifying tests (owned by backend-dev or frontend-dev agent)
 - Deciding whether failures are acceptable (owned by /spec-os-implement or /spec-os-verify)
 - Committing changes (owned by dev-agent)

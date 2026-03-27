@@ -1,13 +1,13 @@
 ---
 name: spec-os-discover
-description: Scan a codebase and extract real coding conventions into spec-os standards files. Use this skill when the developer runs /spec-os-discover, wants to populate standard stubs after /spec-os-init, wants to refresh standards after a major refactor, or asks to discover, extract, or document existing coding patterns or conventions in the project. Also use it when standards files are still marked as STUB and the developer wants to replace them with actual project conventions.
+description: Create and populate spec-os/standards/ with real coding conventions. Use this skill when the developer runs /spec-os-discover, wants to build standards after /spec-os-init, wants to refresh standards after a major refactor, or asks to discover, extract, or document existing coding patterns or conventions in the project. Can bootstrap standards from docs/design/ when no codebase exists yet. Also use it when the developer wants to replace or update existing standards with actual project conventions.
 ---
 
 # /spec-os-discover
 
 ## Goal
 
-Populate `spec-os/standards/` with the conventions that actually exist in the codebase — not invented rules. Every proposed standard requires developer approval before being written.
+Create and populate `spec-os/standards/` with conventions grounded in reality — extracted from code or derived from design decisions, never invented. Every proposed standard requires developer approval before being written.
 
 ## Syntax
 
@@ -21,38 +21,86 @@ Populate `spec-os/standards/` with the conventions that actually exist in the co
 
 ---
 
-## Step 1 — Verify prerequisites
+## Step 1 — Verify prerequisites and detect sources
 
-Read `spec-os/standards/index.yml`. If not found, stop:
-
+Check `spec-os/config.yaml` exists. If not found:
 ```
-spec-os/standards/index.yml not found.
-Run /spec-os-init first to install the spec-os framework.
+spec-os/ not found. Run /spec-os-init first.
 ```
 
-Also read `spec-os/config.yaml` to confirm the project stack. Report:
+Read `spec-os/config.yaml` to confirm the project stack.
+
+If `docs/design/01-stack.md` exists: read it for authoritative stack detail (frameworks, versions, libraries). Use this to determine which stack-specific standard files apply (e.g., `backend/dotnet.md` vs `backend/python.md`). Takes priority over the `stack` field in config.yaml.
+
+Detect available sources:
+- **Code source:** check if source files exist in the repo beyond `spec-os/` (non-empty codebase)
+- **Design source:** check if `docs/design/` exists; if so, note which base files are present (`00-overview.md`, `01-stack.md`, etc.)
+
+If `spec-os/standards/` does not exist: create the directory. It will be populated as standards are approved.
+
+Report:
+```
+Scope:   {global | backend | frontend | all}
+Stack:   {stack from config.yaml}
+Sources:
+  Code:    {found — scanning {N} source files | not found}
+  Design:  {found — {list of docs/design/ base files present} | not found}
+```
+
+If code source detected: delegate an initial structural survey to an Explore subagent before running per-standard scans:
 
 ```
-Scope: {global | backend | frontend | all}
-Stack: {stack from config.yaml}
-Standards to scan: {list of files from index.yml matching scope}
+Analyze this codebase and return:
+1. Folder structure and top-level organization
+2. Main technology stack (languages, frameworks, versions)
+3. General naming conventions observed (files, classes, functions, variables)
+4. Dominant architectural patterns (layered, feature-based, etc.)
+5. Any notable code patterns or idioms used consistently
+
+Do not modify any files. Return findings only.
+```
+
+Use Explore findings to calibrate subsequent Glob/Grep scans in Step 2 — target the right directories and file types instead of scanning broadly.
+
+If neither source found:
+```
+No code or design documents found.
+Standards can still be created manually with /spec-os-standard.
+Proceed anyway? [y/n]
 ```
 
 ---
 
-## Step 2 — Scan codebase
+## Step 2 — Gather evidence per standard
 
-Scan the codebase to find patterns that are demonstrably used — not patterns you think should be used. Use `Glob` and `Grep` to gather evidence.
+For each standard in scope, gather evidence from all available sources before proposing content.
 
-For detailed scan strategies per standard file (what to grep for, which files to examine, what signals to look for), read `references/scan-patterns.md`.
+**From code** (if code source detected): use `Glob` and `Grep` to find demonstrably used patterns. For detailed scan strategies per standard file, read `references/scan-patterns.md`.
 
-**Key principle:** if the codebase contains mixed or inconsistent patterns, surface both — never silently pick one. The developer decides which is canonical.
+**From `docs/design/`** (if design source detected): read the mapped file(s) for each standard:
+
+| Standard | Design file(s) to read |
+|----------|------------------------|
+| `global/naming.md` | `08-glossary.md` |
+| `global/security.md` | `02-security.md` |
+| `backend/architecture.md` | `00-overview.md`, `05-data-model.md`, `06-integrations.md` |
+| `backend/patterns.md` | `00-overview.md`, `03-performance.md` |
+| `backend/error-handling.md` | `07-error-handling.md` |
+| `backend/testing.md` | `01-stack.md` |
+| `backend/{stack}.md` | `01-stack.md` |
+| `frontend/components.md` | `09-design-system.md` |
+| `frontend/state.md` | `01-stack.md` |
+| `frontend/{framework}.md` | `01-stack.md` |
+
+Also read any ADRs in `docs/design/adr/` relevant to the standard being populated.
+
+**Key principle:** if mixed or inconsistent patterns are found across sources, surface both — never silently pick one. The developer decides which is canonical.
 
 ---
 
 ## Step 3 — Propose one standard at a time
 
-For each standard file in scope, present the proposed content to the developer. Process each file individually — batching multiple proposals creates confusion about what is being approved.
+For each standard file in scope, present the proposed content to the developer. Process each file individually — batching multiple proposals creates confusion about what is being approved. For the expected section structure of each standard file, read `references/templates-standards.md`.
 
 ```
 ─────────────────────────────────────────────────
@@ -66,23 +114,25 @@ Write this standard? [y / n / edit]
 ```
 
 - **y** — write as proposed
-- **n** — skip, leave as STUB
+- **n** — skip, no file created
 - **edit** — developer provides corrections; apply and ask again before writing
 
-If the file already has content (not STUB): present a diff-style proposal instead of a full replacement and ask: "Update with extracted patterns? [y / n / edit]"
+If the file already exists with content: present a diff-style proposal and ask: "Update with new findings? [y / n / edit]"
 
 ---
 
 ## Step 4 — Write approved standards
 
-Write each approved file. Replace the STUB status header with:
+Write each approved file. Use a status header that reflects the evidence source:
 
 ```markdown
-> Status: EXTRACTED — {ISO-date}
-> Managed by: /spec-os-standard | Keywords: {from index.yml}
+> Status: EXTRACTED — {ISO-date}        (from code scan)
+> Status: DESIGN-DERIVED — {ISO-date}   (from docs/design/ only)
+> Status: EXTRACTED + DESIGN-DERIVED — {ISO-date}  (from both)
+> Managed by: /spec-os-standard | Keywords: {comma-separated keywords}
 ```
 
-Preserve any content the developer already wrote above the STUB marker.
+After writing each file, add or update its entry in `spec-os/standards/index.yml`.
 
 ---
 
@@ -91,10 +141,10 @@ Preserve any content the developer already wrote above the STUB marker.
 ```
 /spec-os-discover complete.
 
-Updated:   {list of files written}
-Skipped:   {list of files left as STUB}
-Gaps:      {patterns not found — no content extracted}
-Conflicts: {inconsistencies found — need developer resolution}
+Created:      {list of new files written}
+Updated:      {list of existing files updated}
+Not created:  {list skipped — no evidence found}
+Conflicts:    {inconsistencies surfaced — need developer resolution}
 
 Next: refine individual standards with /spec-os-standard
 ```

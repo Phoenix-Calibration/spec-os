@@ -10,7 +10,7 @@ description: Execute one implementation task from tasks.md (one session, one com
 
 ## Goal
 
-Execute one atomic task from `tasks.md` end-to-end: load context, run the inner loop (test-write → implement → test-run), reconcile spec drift, get developer review, commit, and log. One task = one session = one commit.
+Execute one atomic task from `tasks.md` end-to-end: load minimal context, confirm with developer, load full context as file paths, run the inner loop (implement → test-run), reconcile spec drift, get developer review, commit, and log. One task = one session = one commit.
 
 ## Syntax
 
@@ -34,16 +34,17 @@ Otherwise: **EXECUTE MODE** — proceed with steps below.
 
 ---
 
-## Step 2 — Tracker Resolution
+## Step 2 — Tracker Check
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` only — note the tracker type for later use. The full tracker adapter is loaded in Step 5 after confirmation.
+If `spec-os/tracker/` does not exist, skip all tracker operations and continue.
 Operations used by this skill: get-us, update-status, add-comment
 
 ---
 
 ## Step 3 — INIT
 
-Locate the feature folder in `spec-os/changes/`. Read `tasks.md`.
+Read the target task section from `tasks.md` (not the full file — only the section for the specified task-id).
 
 **Check claimed-by:**
 ```
@@ -64,12 +65,12 @@ If status: in-progress:
     git log --oneline --grep="{task-id}" (or check session-log for commit hash)
 
   If commit found:
-    Skip Steps 4–6. Load context (Step 4) then go directly to Step 7 (RECONCILE).
+    Proceed to Step 4 (CONFIRM) then jump to Step 7 (RECONCILE). Skip Steps 5–6.
     Report: "Task {task-id} has a prior commit — resuming at RECONCILE."
 
   If no commit found:
-    Continue from Step 4 with session-log context loaded.
-    Re-enter inner loop at Step 6b.
+    Proceed to Step 4 (CONFIRM) with session-log context loaded. Re-enter inner loop
+    at Step 6b after Step 5 completes.
     Report: "Task {task-id} has no prior commit — resuming at EXECUTE."
 
 If status: done:
@@ -80,6 +81,46 @@ If status: blocked:
 ```
 
 Update task `status: in-progress` in tasks.md.
+
+---
+
+## Step 4 — CONFIRM
+
+Present to developer using only the context already loaded (task section from tasks.md):
+
+```
+─────────────────────────────────────────────────
+Ready to implement: {task-id} — {task title}
+─────────────────────────────────────────────────
+Feature:    {feature-id} — {title}
+Agent:      {backend-dev | frontend-dev}
+Scope:      {files from task scope field}
+Done when:  {done-when criterion}
+Context:    Tier {N} (context-level: {N})
+
+Proceed? [y / n]
+─────────────────────────────────────────────────
+```
+
+Wait for confirmation. Do not proceed to Step 5 without approval.
+
+---
+
+## Step 5 — LOAD & SETUP
+
+All heavy loading and setup happens here — after the developer confirms.
+
+**Load tracker adapter:**
+Read `spec-os/tracker/{type}.md`. Apply the Tracker Resolution block.
+
+**Create session-log.md if first task of feature:**
+```
+Check if spec-os/changes/{feature}/session-log.md exists.
+If it does not exist (this is the first task ever started for this feature):
+  Create session-log.md using the template at
+  .claude/skills/spec-os-implement/references/session-log-template.md
+  (write only the file header — the entry for this task is written in Step 9)
+```
 
 **Update spec.md if first task:**
 ```
@@ -100,50 +141,25 @@ If no done tasks exist (this is the first task being started):
 add-comment tracker US: "T{NN} in progress — {task title} — {current session identifier}"
 ```
 
----
+**Prepare context bundle for dev-agent:**
 
-## Step 4 — LOAD
+TIER 1 (always — inline, small):
+- Read CLAUDE.md first 20 lines → pass inline
+- Target task section already loaded in Step 3 → pass inline
+- Read spec.md frontmatter → pass inline
 
-Load context by tier based on the task's `context-level` field.
+TIER 2 (context-level: 2 or higher — default):
+- Invoke `/spec-os-inject` with task keywords and subagent type → receive list of matched standard **file paths** (not content)
+- Collect path: `spec-os/specs/{domain}/spec.md` (domain spec — if exists)
+- Collect path + task-id: `session-log.md` depends-on entry (if depends-on is set)
+All Tier 2 items are passed as **file paths** to the dev-agent. The dev-agent reads them directly — content never transits through the skill context.
 
-**TIER 1 (always):**
-- Read CLAUDE.md (first 20 lines only)
-- Read tasks.md (target task section only)
-- Read spec.md (frontmatter only)
+If context-level: 1 (lite spec): skip `/spec-os-inject`. Pass `standards-paths: none` to dev-agent.
 
-**TIER 2 (context-level: 2 or higher — default):**
-- Invoke `/spec-os-inject` with task keywords and subagent type
-- Read `spec-os/specs/{domain}/spec.md` (domain spec — if exists)
-- Read session-log.md entry for `depends-on` task only (if depends-on is set)
-
-**TIER 3 (context-level: 3):**
-- Read spec.md fully (or sections matching task scope)
-- Read `spec-os/specs/knowledge-base.md` filtered by task domain and stack tags
-- Read relevant ADRs from `docs/design/adr/` if referenced in spec.md
-
----
-
-## Step 5 — CONFIRM
-
-Determine agent type from task `subagent` field (`backend` or `frontend`).
-
-Present to developer:
-
-```
-─────────────────────────────────────────────────
-Ready to implement: {task-id} — {task title}
-─────────────────────────────────────────────────
-Feature:    {feature-id} — {title}
-Agent:      {backend-dev | frontend-dev}
-Scope:      {files from task scope field}
-Done when:  {done-when criterion}
-Standards:  {list of injected standards files}
-
-Proceed? [y / n]
-─────────────────────────────────────────────────
-```
-
-Wait for confirmation. Do not proceed to the inner loop without approval.
+TIER 3 (context-level: 3):
+- Collect path: `spec.md` (full, or sections matching task scope)
+- Collect path: `spec-os/specs/knowledge-base.md` (dev-agent filters by domain + stack tags)
+- Collect paths: relevant ADRs from `docs/design/adr/` if referenced in spec.md
 
 ---
 
@@ -151,51 +167,32 @@ Wait for confirmation. Do not proceed to the inner loop without approval.
 
 Read `implement.max-iterations` from `spec-os/config.yaml` (default: 3).
 
-### 6a — TEST-WRITE
-
-Invoke `.claude/agents/test-writer` via Agent tool with:
-- `spec-path`: path to spec.md
-- `test-scope`: value from task's `test-scope` field
-- `standards`: injected testing standards
-- `task-id`: current task-id
-
-test-writer returns a proposed test gap list. Present it to developer:
-
-```
-─────────────────────────────────────────────────
-Proposed tests for {task-id}:
-─────────────────────────────────────────────────
-{test-writer proposal output}
-─────────────────────────────────────────────────
-Approve test list? [y / n / edit]
-```
-
-Wait for approval [gate]. On `n`: proceed with no new tests (developer accepts coverage risk). On `edit`: revise list per developer feedback.
-
-### 6b — EXECUTE
+### 6a — EXECUTE
 
 Invoke `.claude/agents/{backend-dev | frontend-dev}` via Agent tool with:
-- Full task context (task definition, tier-loaded files, injected standards)
-- Approved test list from 6a
-- Instruction: implement the task and write approved tests. **Do NOT commit** — the commit happens outside the loop after tests pass.
+- Tier 1 context inline (CLAUDE.md identity, task section, spec.md frontmatter)
+- `standards-paths`: list of file paths from `/spec-os-inject` (or `none` if context-level: 1)
+- `context-paths`: domain spec path, session-log path + depends-on task-id (Tier 2/3 paths)
+- Instruction: implement the task and write tests per the `test-scope` field. Read all files at the provided paths before writing code. **Do NOT commit.**
 
-Agent executes in isolated context with its declared tool restrictions.
+Agent reads all context files directly and executes in its isolated context.
 
-### 6c — TEST-RUN
+### 6b — TEST-RUN
 
 Invoke `.claude/agents/test-runner` via Agent tool with:
 - `test-command`: from project test conventions (dotnet test | pytest | npm test)
-- `test-scope`: task's `test-scope` + any new test files written in 6b
+- `test-files`: task's `test-scope` field + any new test files written in 6a
+  (the task field is named `test-scope` — map it to test-runner's `test-files` parameter)
 - `scope`: current task-id
 
-**On PASS:** exit inner loop → proceed to Step 6d (COMMIT).
+**On PASS:** exit inner loop → proceed to Step 6c (COMMIT).
 
-### 6d — COMMIT
+### 6c — COMMIT
 
-Inner loop exited with PASS. Dev-agent executes the commit:
-- Commit message format: follow `spec-os/standards/global/commits.md`
-- Include: task-id, task title, feature-id in message
-- Example: `feat(F042): T03 — implement equipment status validation`
+Inner loop exited with PASS. Re-invoke `.claude/agents/{backend-dev | frontend-dev}` via Agent tool with:
+- Instruction: commit — stage all changes and create one atomic commit
+- Commit message format: `{type}({domain}): {task-title} [{feature-id}-{task-id}]`
+  (follow `spec-os/standards/global/commits.md` if available — that format takes precedence)
 
 This is the single commit for this task. All code and test changes are included.
 
@@ -205,7 +202,7 @@ This is the single commit for this task. All code and test changes are included.
   ```
   Tests failed — iteration {N}/{max}. Passing failure details to dev-agent for correction.
   ```
-  Re-invoke dev-agent with failure report from test-runner. Return to 6b.
+  Re-invoke dev-agent with failure report from test-runner. Return to 6a.
 - If `iteration == max-iterations`:
   ```
   ─────────────────────────────────────────────────
@@ -271,14 +268,14 @@ Approve? [y / n / request-changes]
 ```
 
 - **y** → proceed to Step 9
-- **n** → discard commit (dev-agent runs `git reset --hard HEAD~1`), return to inner loop
-- **request-changes** → commit exists; dev-agent runs `git reset HEAD~1` (uncommit, preserves changes in working directory) → return to Step 6b with developer's instructions
+- **n** → re-invoke dev-agent with instruction: "run `git reset --hard HEAD~1` to discard this commit, then stop." Return to Step 6a.
+- **request-changes** → re-invoke dev-agent with instruction: "run `git reset HEAD~1` to uncommit but preserve changes in the working directory, then apply these corrections: {developer's instructions}." Return to Step 6b with developer's instructions in scope.
 
 ---
 
 ## Step 9 — LOG
 
-Write a new entry to `session-log.md` for this task. Use the template from `docs/master-plan/04-templates.md`.
+Write a new entry to `session-log.md` for this task. Use the template from `.claude/skills/spec-os-implement/references/session-log-template.md`.
 
 Update `tasks.md`:
 - `status: done`
@@ -313,9 +310,9 @@ Run /spec-os-implement {next-task-id} to continue.
 /spec-os-implement reconcile [task-id]
 ```
 
-Runs only Steps 2–3 (read config + locate task) and Step 7 (RECONCILE) on a completed task. Useful after a manual code review surfaces spec drift that was missed during the original session.
+Runs only the first part of Step 3 (locate feature folder, read target task section) and Step 7 (RECONCILE) on a completed task. Useful after a manual code review surfaces spec drift that was missed during the original session.
 
-Does not re-run the inner loop. Does not commit. Only detects and routes drift.
+Does NOT run: CONFIRM (Step 4), LOAD & SETUP (Step 5), the inner loop (Step 6), LOG (Step 9), or US GATE (Step 10). Does not commit. Only detects and routes drift.
 
 ---
 
@@ -327,18 +324,21 @@ Does not re-run the inner loop. Does not commit. Only detects and routes drift.
 
 Releases `claimed-by` for the specified task. Sets `claimed-by: —` and `status: planned` in tasks.md (reverting from in-progress). Use when a developer abandons a session without completing the task and another developer needs to pick it up.
 
-Writes a note to session-log.md: `{task-id} unclaimed by {dev} on {date} — reason: {ask developer for reason}`.
+Writes a note to `session-log.md`: `{task-id} unclaimed by {dev} on {date} — reason: {ask developer for reason}`.
+
+If `session-log.md` does not exist: create it using the header from `.claude/skills/spec-os-implement/references/session-log-template.md` before writing the unclaim note.
 
 ---
 
 ## Rules
 
 - **One task per session.** Never implement two tasks in one invocation. The inner loop is per-task, not per-feature.
-- **Claim before loading.** Step 3 (claim) must complete before Step 4 (load context). Never load tier-2 or tier-3 context for a task that another developer has claimed.
-- **Gates are not optional.** Step 5 (CONFIRM), the test-write gate (6a), and Step 8 (REVIEW) are mandatory. They exist because autonomous implementation without checkpoints produces hard-to-review diffs.
-- **Commit ownership belongs to dev-agent.** The skill never commits directly. The commit happens in Step 6d after the inner loop exits with PASS — not inside the loop. This ensures a commit is never created from failing-test state.
+- **Claim before loading.** Step 3 (claim) must complete before Step 5 (load context). Never load Tier 2 or Tier 3 context for a task that another developer has claimed.
+- **Gates are not optional.** Step 4 (CONFIRM) and Step 8 (REVIEW) are mandatory. They exist because autonomous implementation without checkpoints produces hard-to-review diffs.
+- **Commit ownership belongs to dev-agent.** The skill never commits directly. The commit happens when Step 6c re-invokes the dev-agent with instruction `commit` — not inside the inner loop iterations. This ensures a commit is never created from failing-test state.
 - **RECONCILE is not a blocker.** If the developer says `n` to recording spec drift, the session continues — the drift is logged in session-log.md. Unrecorded drift is a technical debt, not a blocker.
 - **Resume mode trusts session-log.** When resuming an in-progress task, the session-log entry is the authoritative record of what was done. Load it before loading any other context.
+- **Context is passed as paths, not content.** Tier 2 and Tier 3 context (standards, domain spec, knowledge-base, ADRs) are passed to dev-agents as file paths. The dev-agent reads them directly. This keeps the orchestration context lean.
 
 ---
 
@@ -349,4 +349,3 @@ Watch for these signals after each session:
 - **Inner loop hits max-iterations frequently** → tasks may be too large or `done-when` criteria too vague. Suggest tightening task scope in `/spec-os-plan`.
 - **RECONCILE fires on most tasks** → spec.md is being written too early. Consider suggesting a longer design phase before implementation starts.
 - **Developer uses `request-changes` at REVIEW often** → inner loop produces poor first drafts. Check whether injected standards are too sparse or context-level is set too low.
-- **test-writer proposals are consistently rejected** → AC scenarios in spec.md may not be written with enough specificity to generate useful tests.

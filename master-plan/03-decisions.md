@@ -522,6 +522,77 @@ AGENT:  invokes .claude/agents/{backend-dev | frontend-dev} via Agent tool
 
 ---
 
+### Decision 24: Tracker Module — spec-os/tracker/ as Physical Isolation Layer
+
+**Problem:** The tracker adapter (Decision 1) is conceptually defined as Layer 4 but has no
+physical isolation in the filesystem. Tracker config lives in `spec-os/config.yaml` alongside
+non-tracker settings. The MCP operation mapping lives in `.claude/shared/tracker-adapter.md`
+as a framework file, equal for all projects. Skills mix tracker resolution with their own logic.
+Adding or swapping a tracker requires touching multiple files across multiple directories.
+
+**Solution:** A dedicated `spec-os/tracker/` module that contains everything tracker-related.
+A new standalone skill `/spec-os-tracker` owns this module. `/spec-os-init` invokes it as its
+final step when a tracker is declared, and it can be run independently at any later time.
+
+**Module structure (created per project by /spec-os-tracker):**
+```
+spec-os/tracker/
+  config.yaml   ← tracker connections (org, project, repo, type)
+  ado.md        ← ADO adapter: resolution logic + MCP operation mapping
+  github.md     ← GitHub adapter: resolution logic + MCP operation mapping
+```
+
+**spec-os/config.yaml** retains only non-tracker settings:
+```yaml
+project:
+  cadence-format: sprint
+workflow:
+  approval-gates:
+    skill-handoffs: explicit
+    spec-changes: explicit
+    destructive-actions: explicit
+    pr-creation: explicit
+```
+
+**How skills use the module:**
+1. Check if `spec-os/tracker/` exists — if not, continue in tracker-free mode
+2. Read `spec-os/tracker/config.yaml` → identify tracker type for current repo
+3. Read `spec-os/tracker/{type}.md` → load operation mapping
+4. Execute only the operations listed in the skill's own step
+
+**Skill responsibilities:**
+
+| Skill | Responsibility |
+|-------|---------------|
+| `/spec-os-tracker` | Creates and updates `spec-os/tracker/` — standalone + called by init |
+| `/spec-os-init` | Invokes `/spec-os-tracker` as final step if tracker declared in I.2 |
+| All other skills | Read `spec-os/tracker/` — never write to it |
+
+**Setup flow:**
+```
+/spec-os-product → /spec-os-init → [/spec-os-tracker] → /spec-os-discover
+                                    (invoked by init if tracker declared,
+                                     or run independently later)
+```
+
+**Adding a new tracker (e.g., Linear):**
+- Run `/spec-os-tracker` → select Linear → creates `spec-os/tracker/linear.md`
+- Zero changes to any other skill
+
+**Migration from Decision 1:**
+- `.claude/shared/tracker-adapter.md` is retired — its content moves into per-project
+  `ado.md` and `github.md` files created by `/spec-os-tracker`
+- `spec-os/config.yaml` tracker section moves to `spec-os/tracker/config.yaml`
+- CLAUDE.md template (Decision 6): `Tracker: see spec-os/tracker/config.yaml`
+
+**Supersedes:** Decision 1 tracker config location and `.claude/shared/tracker-adapter.md`.
+The security rule (no credentials in config) and the abstract operation pattern remain unchanged.
+
+**Skills impacted:** spec-os-init (invokes spec-os-tracker), spec-os-brainstorm, spec-os-plan,
+spec-os-verify, spec-os-bug, spec-os-abandon (all read tracker module instead of config.yaml).
+
+---
+
 ## 9. Resolved Gaps
 
 ### Gap A — Multi-Developer Parallel Work [RESOLVED]

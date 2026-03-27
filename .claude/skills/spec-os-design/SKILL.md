@@ -26,31 +26,39 @@ Transform `origin.md` into a formal `spec.md` — the observable behavior contra
 
 If `update` argument provided → jump to **UPDATE MODE**.
 
-Otherwise: **CREATE MODE** — proceed with steps below.
+Otherwise: auto-detect in Step 2 based on folder state.
 
 ---
 
-## Step 2 — Locate feature folder
+## Step 2 — Locate feature folder and detect mode
 
 If `feature-id` provided: find matching folder in `spec-os/changes/` (folder name starts with `{feature-id}`).
 
-If not provided: scan `spec-os/changes/` for the most recent folder containing `origin.md` but no `spec.md`. Present to dev:
+If not provided: scan `spec-os/changes/` for the most recent folder containing `origin.md` or `origin-*.md` files. Present to dev:
 
 ```
-Found: spec-os/changes/{folder}/origin.md
+Found: spec-os/changes/{folder}/
 Feature: {id} — {title from origin.md}
 
 Proceeding with this feature? [y/n]
 ```
 
-Wait for confirmation.
+Wait for confirmation. Then detect mode based on folder state:
+
+- **No `spec.md` in folder** → **CREATE MODE** — continue with Step 3.
+- **`spec.md` exists AND unincorporated `origin-*.md` files found** (files not listed in `spec.md` frontmatter `sources:`) → **EXTEND MODE** — jump to EXTEND MODE section.
+- **`spec.md` exists, no unincorporated origins** → stop:
+  ```
+  spec.md is up to date for this feature.
+  Use /spec-os-design update if implementation revealed undocumented behavior.
+  ```
 
 ---
 
 ## Step 3 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
-Operations used by this skill: get-feature, create-feature, update-status
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
+Operations used by this skill: get-feature, update-status
 
 Read `origin.md`. Extract `feature-id`, `tracker-type`, `tracker-url`. Fetch the Feature from the tracker. Extract: title, description, area path / labels.
 
@@ -88,9 +96,11 @@ If found: report the conflict and ask developer whether to proceed.
 ## Step 5 — Read design context
 
 Read in parallel:
-- `docs/design/00-overview.md` (system architecture — if exists)
-- `spec-os/specs/{domain}/spec.md` (domain spec — known entities and behaviors)
-- `origin.md` fully — pay particular attention to **Pending decisions** section
+- `docs/design/00-overview.md` — system architecture (if exists)
+- `docs/design/01-stack.md` — authoritative stack and available technologies (if exists)
+- `docs/design/05-data-model.md` — core entities and relationships (if exists; directly informs Domain model section of full specs)
+- `spec-os/specs/{domain}/spec.md` — domain spec, known entities and behaviors
+- `origin.md` (or all unincorporated `origin-*.md` in EXTEND mode) — pay particular attention to **Pending decisions** section
 
 This context informs the scope boundaries, domain model, and design decision sections of `spec.md`.
 
@@ -128,7 +138,13 @@ Wait for confirmation before drafting.
 
 ## Step 7 — Draft spec.md
 
-Using context from Steps 3–6, draft `spec.md`. Use the template from `docs/master-plan/04-templates.md`.
+Using context from Steps 3–6, draft `spec.md`. Use the template from `.claude/skills/spec-os-design/references/spec-template.md`. Use the template from `.claude/skills/spec-os-design/references/spec-delta-template.md` when creating `spec-delta.md` in Step 9.
+
+**For full specs with context-level 3** (cross-repo, security, high ambiguity): before drafting `## Domain model` and `## Design decisions`, offer to invoke the architect agent:
+```
+This is a complex spec (context-level 3). Invoke architect agent for Domain model and Design decisions sections? [y/n]
+```
+If `y`: invoke `/spec-os-inject` with keywords: architecture patterns backend → get `standards-paths` (list of file paths). Then invoke `.claude/agents/architect` with: origin.md content, approved design context (00-overview, 01-stack, 05-data-model), pending decisions list, standards-paths (if available). Instruction: propose Domain model additions and Design decisions resolutions. Gate each section with developer before incorporating into the draft.
 
 **Pending decisions from origin.md:** resolve each one in the `## Design decisions` section of `spec.md`. Each resolution is permanent in the spec. Add a `## Resolution notes` entry in `origin.md` only if that section is currently empty.
 
@@ -162,16 +178,16 @@ Create this spec? [y / n / edit]
 
 ## Step 9 — Create files
 
-On approval, create all four files in the feature folder:
+On approval, create both files in the feature folder:
 
-1. `spec.md` — the approved draft (status: planned)
+1. `spec.md` — the approved draft. Set frontmatter `sources: [origin.md]` to track which origin files have been incorporated.
 2. `spec-delta.md` — header only, empty body (ready for evolution tracking)
-3. `session-log.md` — header only, empty body (ready for implement)
-4. `verify-report.md` — header only, empty body (ready for verify)
 
-Use headers from `docs/master-plan/04-templates.md`.
+Then invoke `update-status` on the tracker Feature to mark it as "Spec ready" (if tracker is configured).
 
 `origin.md` is **not modified**. Add `## Resolution notes` to it only if that section was empty and pending decisions existed.
+
+Note: `session-log.md` is created by `/spec-os-implement` at the start of its first session. `verify-report.md` is created by `qa-engineer` during `/spec-os-verify`. Each skill owns its own artifact.
 
 ---
 
@@ -183,8 +199,6 @@ Use headers from `docs/master-plan/04-templates.md`.
 Created:
   spec-os/changes/{folder}/spec.md          (spec-level: {lite | full})
   spec-os/changes/{folder}/spec-delta.md    (empty)
-  spec-os/changes/{folder}/session-log.md   (empty)
-  spec-os/changes/{folder}/verify-report.md (empty)
 
 Feature: {id} — {title}
 Domain:  {domain}
@@ -194,6 +208,80 @@ Run /spec-os-plan to continue.
 ```
 
 If `skill-handoffs: explicit` in `spec-os/config.yaml` (default): stop here. Do not invoke `/spec-os-plan` automatically.
+
+---
+
+## EXTEND MODE
+
+Use when: feature folder already has `spec.md` and new `origin-{slug}.md` files were added by `/spec-os-brainstorm` (not yet listed in `spec.md` frontmatter `sources:`).
+
+### E.1 — Identify unincorporated origins
+
+Read `spec.md` frontmatter `sources:` list. Read all `origin-*.md` files in the folder. Identify files not in the sources list — these are the new requirements to incorporate.
+
+### E.2 — Read design context
+
+Same as CREATE MODE Step 5 — read `docs/design/` files and domain spec in parallel.
+
+### E.3 — Analyze new requirements
+
+For each unincorporated origin file, identify which sections of `spec.md` need extension:
+- New requirements → `## Requirements`
+- New entities or relationships → `## Domain model`
+- New architectural choices → `## Design decisions`
+
+Present analysis:
+
+```
+─────────────────────────────────────────────────
+Extending spec.md with: {origin-slug.md}
+─────────────────────────────────────────────────
+New requirements:    {N}
+Domain model adds:   {entities or "none"}
+Design decisions:    {new decisions or "none"}
+
+Proceed? [y/n]
+─────────────────────────────────────────────────
+```
+
+### E.4 — Draft and propose extensions
+
+Draft additions to each relevant section. Present as targeted diff:
+
+```
+─────────────────────────────────────────────────
+Proposed extension: spec-os/changes/{folder}/spec.md
+─────────────────────────────────────────────────
+## Requirements — adding:
+{new requirement text with RFC 2119}
+
+## Domain model — adding:
+{new entity or relationship — if applicable}
+─────────────────────────────────────────────────
+Apply? [y / n / edit]
+─────────────────────────────────────────────────
+```
+
+### E.5 — Write changes
+
+On approval:
+- Append new content to the relevant sections of `spec.md`
+- Add the newly incorporated origin file(s) to `sources:` in `spec.md` frontmatter
+- Update `last-updated` in `spec.md` frontmatter
+- Append entry to `spec-delta.md`: trigger `extend`, sources added, sections modified
+- Invoke `update-status` on tracker Feature (if configured)
+
+### E.6 — Report
+
+```
+/spec-os-design (extend) complete.
+
+Extended:  spec-os/changes/{folder}/spec.md
+Sources:   {origin-slug.md} added
+Sections:  {Requirements | Domain model | Design decisions}
+
+Run /spec-os-plan to update the task breakdown.
+```
 
 ---
 

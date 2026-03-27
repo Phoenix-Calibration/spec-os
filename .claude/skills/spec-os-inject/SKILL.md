@@ -1,13 +1,13 @@
 ---
 name: spec-os-inject
-description: Load only the standards relevant to the current task from spec-os/standards/ and return their content for injection into a subagent's context. Called internally by /spec-os-implement — not typically invoked directly by the developer. Use this skill when an implementation session needs to inject standards context before delegating to a backend-dev or frontend-dev subagent, or whenever task-relevant standards need to be loaded based on keywords and stack.
+description: Match standards relevant to the current task from spec-os/standards/ and return their file paths for injection into a subagent's context. Called internally by /spec-os-implement — not typically invoked directly by the developer. Use this skill when an implementation session needs to inject standards context before delegating to a backend-dev or frontend-dev subagent, or whenever task-relevant standards need to be selected based on keywords and stack.
 ---
 
 # /spec-os-inject
 
 ## Goal
 
-Return the content of only the standard files relevant to the current task — keeping subagent context lean and focused rather than loading every standard regardless of relevance.
+Return the file paths of only the standard files relevant to the current task. The dev-agent reads them directly — content never transits through the orchestration context, keeping it lean.
 
 ## Syntax
 
@@ -37,13 +37,15 @@ Ensure /spec-os-init has been run in this project.
 
 ---
 
-## Step 2 — Enrich keywords with stack
+## Step 2 — Enrich keywords with stack and domain
 
 Read `spec-os/config.yaml` to get the `project.stack` field. Add the stack value as an implicit keyword so that stack-specific standards are always included without the caller having to remember to pass them.
 
 For example: if `stack: dotnet`, the keyword `dotnet` is added to the match set even if not explicitly provided.
 
-If the active feature folder is known (from context), also read that feature's `spec.md` frontmatter for its `stack` field — this overrides the project-level default if different.
+If the active feature folder is known (from context), also read that feature's `spec.md` frontmatter for:
+- `stack` field — overrides the project-level default if different
+- `domain` field — add it as an implicit keyword so that domain-specific standards (e.g., `backend/equipment.md`) are always included when working on that domain
 
 ---
 
@@ -61,43 +63,34 @@ Apply subagent-type filter — this prevents injecting irrelevant standards into
 
 ---
 
-## Step 4 — Load matched files
+## Step 4 — Verify matched files exist
 
-Read each matched standard file from disk. If a file is missing (exists in index but not on disk — e.g., still at STUB stage), skip it and note it:
+For each matched entry, check whether the standard file exists on disk. If a file is missing (exists in index but not on disk — e.g., still at STUB stage), skip it and note it:
 
 ```
 [spec-os-inject] Warning: spec-os/standards/{path} referenced in index but not found on disk — skipping.
 ```
 
+Do not read file contents.
+
 ---
 
-## Step 5 — Return injected content
+## Step 5 — Return matched file paths
 
-Return all matched content concatenated, with clear section separators so the receiving subagent can parse the boundaries:
+Return the list of matched file paths so the receiving dev-agent can read them directly:
 
 ```
-## Injected Standards
+## Injected Standards — File Paths
 
-### {category}/{standard}
-> Keywords matched: {which keywords triggered this file}
-
-{full file content}
-
----
-
-### {category}/{standard}
-> Keywords matched: {which keywords triggered this file}
-
-{full file content}
-
----
+- spec-os/standards/{category}/{standard}.md  (matched: {keywords})
+- spec-os/standards/{category}/{standard}.md  (matched: {keywords})
 ```
 
 If no files matched:
 
 ```
 [spec-os-inject] No matching standards for keywords: {keywords}
-Standards will not be injected into this session.
+standards-paths: none
 ```
 
 ---
@@ -105,7 +98,7 @@ Standards will not be injected into this session.
 ## Rules
 
 - **Read-only.** Never write, modify, or create files.
-- **Return full content.** Do not summarize or truncate standard file contents — the subagent needs complete rules to apply them correctly.
+- **Return file paths only.** Do not read or return file contents — the dev-agent reads them directly. This keeps the orchestration context lean.
 - **Always include stack keywords.** A task about testing in a .NET project should get `backend/testing` AND `backend/dotnet`, even if the caller only passed `testing`.
 - **Fail gracefully.** Missing files are warnings, not errors. Proceed with whatever can be loaded.
 - **Stay fast.** This skill is called at the start of every implementation session — keep reads minimal and return promptly.

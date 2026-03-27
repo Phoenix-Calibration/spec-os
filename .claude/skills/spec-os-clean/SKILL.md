@@ -101,9 +101,9 @@ Knowledge base: {N} entries removed, {N} updated. Total entries: {N}.
 
 ---
 
-## Tracker Resolution
+## Step 5.5 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-feature, get-us, update-status
 
 ---

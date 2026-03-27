@@ -1,16 +1,15 @@
 ---
 name: spec-os-sync
-description: Sync pending lessons from session-log.md to the project knowledge base.
-  Use this skill when /spec-os-verify has created a PR (runs automatically as part of
-  that flow), or when the developer runs /spec-os-sync manually to sync lessons from a
-  completed User Story. Lesson sync only — no archival.
+description: Sync pending lessons from session-log.md to the knowledge base and update
+  the domain spec with completed feature behavior. Runs automatically after PR creation.
+  Also available manually after a completed User Story. No archival.
 ---
 
 # /spec-os-sync
 
 ## Goal
 
-Extract lessons marked `pending: true` from `session-log.md` and write them to `spec-os/specs/knowledge-base.md` with validated tags. Idempotent — safe to run multiple times on the same feature.
+Extract lessons marked `pending: true` from `session-log.md`, write them to `spec-os/specs/knowledge-base.md` with validated tags, and update `spec-os/specs/{domain}/spec.md` to reflect completed feature behavior. Idempotent — safe to run multiple times on the same feature.
 
 ## Syntax
 
@@ -69,6 +68,59 @@ For each lesson:
 
 ---
 
+## Step 3.5 — Domain spec update
+
+Read in parallel:
+- Feature `spec.md` — Requirements and Domain model sections
+- Feature `spec-delta.md` — all entries
+- `spec-os/specs/{domain}/spec.md` — current domain state
+
+Identify behavioral changes completed in this US that are not yet reflected in the
+domain spec:
+- New entities or entity states
+- New or modified behaviors/transitions
+- Behaviors removed or superseded
+
+If no domain-level changes detected → skip to Step 4.
+
+**Classify the change:**
+
+**Additive** (new scenarios, new entity states, new behaviors appended to existing
+domain model — no structural reorganization): draft update directly from spec.md
+and spec-delta.md content.
+
+**Structural** (new entities, modified domain model shape, cross-domain implications,
+or significant reorganization of existing behaviors):
+```
+US #{id} introduces structural changes to the {domain} domain.
+Invoke architect to review domain spec impact before updating? [y/n]
+```
+If `y`: invoke `.claude/agents/architect` via Agent tool with:
+- Current `spec-os/specs/{domain}/spec.md`
+- Feature `spec.md` (Requirements + Domain model sections)
+- `spec-delta.md` entries for this US
+- `docs/design/00-overview.md` and `docs/design/05-data-model.md` (if exist)
+- Instruction: propose targeted updates to the domain spec reflecting the
+  completed feature behavior. Minimal change — only what the US added or modified.
+  Return proposal only — do not write files.
+
+Use architect proposal as the update draft.
+
+**Present proposed update to developer:**
+```
+─────────────────────────────────────────────────
+Proposed update: spec-os/specs/{domain}/spec.md
+─────────────────────────────────────────────────
+{targeted diff — ADDED / MODIFIED / REMOVED sections}
+─────────────────────────────────────────────────
+Apply? [y / n / edit]
+```
+
+On approval: write updated `spec-os/specs/{domain}/spec.md`.
+On `n`: log as skipped in sync report — domain spec not updated for this US.
+
+---
+
 ## Step 4 — Write to knowledge base
 
 Read `spec-os/specs/knowledge-base.md`. If the file does not exist, create it with the header before writing:
@@ -112,14 +164,15 @@ This makes the operation idempotent — re-running sync on the same feature will
 
 Lessons synced: {N}
 Lessons skipped (not generalizable): {N}
-Knowledge base: spec-os/specs/knowledge-base.md updated
+Knowledge base:  spec-os/specs/knowledge-base.md updated
+Domain spec:     spec-os/specs/{domain}/spec.md {updated | skipped — no domain changes | skipped — developer declined}
 ```
 
 ---
 
 ## Rules
 
-- **Lesson sync only.** Archival of completed features is the responsibility of `/spec-os-clean`. Never move or modify folders in `spec-os/changes/`.
+- **Lesson sync + domain spec update.** Archival of completed features is the responsibility of `/spec-os-clean`. Never move or modify folders in `spec-os/changes/`.
 - **Idempotent by design.** The `pending: false` flag prevents double-syncing. Running sync twice on the same feature is safe and produces no duplicates.
 - **Domain validation is not optional.** A lesson with an invalid domain tag pollutes the knowledge base filter. The Step 3 validation gate exists to preserve knowledge-base integrity.
 - **Runs automatically after PR creation.** This is the only automatic (non-gated) invocation in spec-os. It is safe to automate because sync is idempotent and affects only the knowledge base, not source code or spec artifacts.

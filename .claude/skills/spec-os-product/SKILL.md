@@ -4,15 +4,21 @@ description: Create or update the product documentation layer (docs/). Use this 
   when the developer runs /spec-os-product, wants to create mission.md and roadmap.md
   from scratch, wants to generate docs from an existing codebase, or needs to update
   existing product documentation. Runs before /spec-os-init — gives the framework
-  product context at setup time. Also use when asked to update mission, roadmap, or
-  design documentation.
+  product context at setup time. Also use when the developer asks to document their
+  product, write a mission statement, define scope or roadmap, set up the docs/ folder,
+  create or update design documentation, add an ADR, or describe what the product does
+  and for whom — even if they don't mention /spec-os-product explicitly.
 ---
 
 # /spec-os-product
 
 ## Goal
 
-Own the `docs/` layer entirely. Create or update product documentation — mission, roadmap, and design structure — so that `/spec-os-init` can seed the project configuration with product context and the team has a stable reference for what the product is and why it exists.
+Own the `docs/` layer entirely. Orchestrate the creation and update of product
+documentation by delegating to specialized agents — `product-owner`, `architect`,
+`security-engineer`, `ui-ux-designer` — and writing the approved outputs. Runs before
+`/spec-os-init` to give the framework product context and the team a stable reference
+for what the product is and why it exists.
 
 ## Syntax
 
@@ -33,6 +39,10 @@ If `mode` argument provided, use it directly. Otherwise auto-detect:
 1. `docs/mission.md` exists → **UPDATE mode**
 2. Project has existing source files (non-empty repo, no `docs/mission.md`) → **GENERATE mode**
 3. Otherwise → **INITIALIZE mode**
+
+**Check for existing standards:**
+If `spec-os/standards/` exists, note it — relevant standards will be passed to agents
+as context in subsequent steps.
 
 Report detected mode and reason. Proceed.
 
@@ -79,153 +89,188 @@ Wait for developer answers. Incomplete answers are fine — mark gaps as TBD.
 
 ### I.2 — Propose docs structure
 
-Present what will be created:
+Present what will be created and which agent owns each section:
 
 ```
 ─────────────────────────────────────────────────
 Proposed docs/ structure:
 ─────────────────────────────────────────────────
 docs/
-  mission.md          ← product purpose, users, problem solved
-  roadmap.md          ← strategic direction, potential future features
+  mission.md              ← product-owner
+  roadmap.md              ← product-owner
   design/
-    README.md         ← index of all design files
-    00-overview.md    ← system history, architecture overview, future technical vision (stub)
-    01-stack.md       ← technologies, frameworks, versions (stub)
-    02-security.md    ← auth, authorization, data protection (stub)
-    03-performance.md ← targets, caching strategy, optimization (stub)
-    04-metrics.md     ← KPIs, monitoring, alerting (stub)
-    05-data-model.md  ← core entities, relationships, value objects (stub)
-    06-integrations.md ← external systems, APIs, webhooks (stub)
-    07-error-handling.md ← error types, patterns, API responses (stub)
-    08-glossary.md    ← domain terminology (stub)
-    09-design-system.md ← UI components, palette, typography (stub)
-    adr/              ← Architecture Decision Records (empty)
-  runbooks/           ← operational runbooks (empty directory)
-  manual/             ← user-facing documentation (empty directory)
+    README.md             ← skill
+    00-overview.md        ← architect
+    01-stack.md           ← architect
+    02-security.md        ← security-engineer
+    03-performance.md     ← stub
+    04-metrics.md         ← stub
+    05-data-model.md      ← architect
+    06-integrations.md    ← stub
+    07-error-handling.md  ← stub
+    08-glossary.md        ← stub
+    09-design-system.md   ← ui-ux-designer
+    adr/                  ← empty
+  runbooks/               ← empty
+  manual/                 ← empty
 
 Create? [y / n]
 ─────────────────────────────────────────────────
 ```
 
-### I.3 — Write files
+### I.3 — Invoke product-owner
 
-On approval, read all reference templates before writing anything:
-- `references/template-mission.md` — structure and sections for `docs/mission.md`
-- `references/template-roadmap.md` — structure and sections for `docs/roadmap.md`
-- `references/template-design.md` — structure for `docs/design/00-overview.md` and any other design docs
-- `references/template-adr.md` — structure for ADRs in `docs/design/adr/` (create when dev adds an ADR)
-- `references/template-runbook.md` — structure for runbooks in `docs/runbooks/` (create when dev adds a runbook)
+Read reference templates before invoking:
+- `references/template-mission.md`
+- `references/template-roadmap.md`
+
+If `spec-os/standards/` exists: read `spec-os/standards/index.yml`, load any standards
+relevant to product documentation or global conventions.
+
+Invoke `.claude/agents/product-owner` via Agent tool with:
+- Product answers from I.1
+- Content of `references/template-mission.md` and `references/template-roadmap.md`
+- Standards (if available)
+- Instruction: draft `docs/mission.md` and `docs/roadmap.md` based on the product answers
+  and the template structures. Propose — do not write files.
+
+Present output to developer:
+
+```
+─────────────────────────────────────────────────
+product-owner — docs/mission.md + docs/roadmap.md
+─────────────────────────────────────────────────
+{product-owner proposed content}
+─────────────────────────────────────────────────
+Accept? [y / edit / skip]
+  skip → creates minimal stubs instead
+─────────────────────────────────────────────────
+```
+
+On `edit`: revise with developer feedback, re-present. On `skip`: note as stub.
+
+### I.4 — Invoke architect
+
+Read reference template before invoking:
+- `references/template-design.md`
+
+If `spec-os/standards/` exists: load architecture-relevant standards
+(keywords: architecture, patterns, backend).
+
+Invoke `.claude/agents/architect` via Agent tool with:
+- Approved mission.md content (from I.3)
+- Product answers from I.1 (constraints, capabilities)
+- Content of `references/template-design.md`
+- Standards (if available)
+- Instruction: propose content for `docs/design/00-overview.md` (architecture vision,
+  system description, future technical direction), `docs/design/01-stack.md` (recommended
+  technologies, frameworks, versions), and `docs/design/05-data-model.md` (core entities
+  and relationships). Propose — do not write files.
+
+Present output section by section — gate each doc independently:
+
+```
+─────────────────────────────────────────────────
+architect — docs/design/00-overview.md
+─────────────────────────────────────────────────
+{proposed content}
+─────────────────────────────────────────────────
+Accept? [y / edit / skip]
+─────────────────────────────────────────────────
+```
+
+Repeat for `01-stack.md` and `05-data-model.md`.
+
+### I.5 — Invoke security-engineer
+
+If `spec-os/standards/` exists: load security-relevant standards (keywords: security, auth,
+credentials, secrets).
+
+Invoke `.claude/agents/security-engineer` via Agent tool in Modo diseño with:
+- Approved mission.md content
+- Approved 01-stack.md content (stack and technologies)
+- Standards (if available)
+- Instruction: propose content for `docs/design/02-security.md` — threat model,
+  auth strategy, encryption, secrets management, security headers. Propose — do not write files.
+
+Present output to developer:
+
+```
+─────────────────────────────────────────────────
+security-engineer — docs/design/02-security.md
+─────────────────────────────────────────────────
+{proposed content}
+─────────────────────────────────────────────────
+Accept? [y / edit / skip]
+─────────────────────────────────────────────────
+```
+
+### I.6 — Invoke ui-ux-designer
+
+If `spec-os/standards/` exists: load frontend-relevant standards (keywords: component,
+state, frontend).
+
+Invoke `.claude/agents/ui-ux-designer` via Agent tool with:
+- Approved mission.md content (product type, target users)
+- Approved 01-stack.md content (frontend stack)
+- Standards (if available)
+- Instruction: propose content for `docs/design/09-design-system.md` — component
+  philosophy, palette approach, typography, spacing system, accessibility baseline.
+  Propose — do not write files.
+
+Present output to developer:
+
+```
+─────────────────────────────────────────────────
+ui-ux-designer — docs/design/09-design-system.md
+─────────────────────────────────────────────────
+{proposed content}
+─────────────────────────────────────────────────
+Accept? [y / edit / skip]
+─────────────────────────────────────────────────
+```
+
+### I.7 — Write all approved content
+
+Read all remaining reference templates:
+- `references/template-design.md` — for stub sections and README
 
 Create files in this order:
 
-1. `docs/mission.md`
-2. `docs/roadmap.md`
-3. `docs/design/README.md` (index — use template-design.md README section)
-4. `docs/design/00-overview.md` (stub — fill with known architecture or mark TBD)
-5. `docs/design/01-stack.md` (stub)
-6. `docs/design/02-security.md` (stub)
-7. `docs/design/03-performance.md` (stub)
-8. `docs/design/04-metrics.md` (stub)
-9. `docs/design/05-data-model.md` (stub)
-10. `docs/design/06-integrations.md` (stub)
-11. `docs/design/07-error-handling.md` (stub)
-12. `docs/design/08-glossary.md` (stub)
-13. `docs/design/09-design-system.md` (stub)
-14. `docs/design/adr/` (empty directory — `.gitkeep`)
-15. `docs/runbooks/README.md` (folder index — use template-runbook.md README section)
-16. `docs/manual/` (empty directory — `.gitkeep`)
-
-Write:
-
-**`docs/mission.md`:**
-```markdown
-# {Product Name}
-
-## Purpose
-{one paragraph: what the product does, for whom, and why}
-
-## Problem solved
-{the specific problem this product addresses}
-
-## Primary users
-{list of user types with one-line description each}
-
-## Success criteria
-{what success looks like for users — observable outcomes}
-
-## Scope
-### In scope
-{main capabilities being built}
-
-### Out of scope
-{explicit exclusions — important for future reference}
-
-## Constraints
-{technical, business, or regulatory constraints}
-
-## Status
-{active development | maintenance | deprecated}
-Last updated: {ISO-date}
-```
-
-**`docs/roadmap.md`:**
-```markdown
-# Roadmap — {Product Name}
-
-> This is a strategic direction document, not a sprint plan.
-> Specific features are tracked in spec-os/changes/ and the tracker.
-
-## North star
-{the long-term vision — one sentence}
-
-## Current focus
-{what the team is building right now — high level}
-
-## Potential future capabilities
-{unordered list of capabilities that might be built — not committed}
-
-## Deliberately excluded
-{capabilities that have been considered and rejected — with brief reason}
-
-Last updated: {ISO-date}
-```
-
-Create stub files and empty directories for `docs/design/`, `docs/runbooks/`, `docs/manual/`, `docs/design/adr/`.
+1. `docs/mission.md` — approved product-owner content (or stub)
+2. `docs/roadmap.md` — approved product-owner content (or stub)
+3. `docs/design/README.md` — index from `references/template-design.md`
+4. `docs/design/00-overview.md` — approved architect content (or stub)
+5. `docs/design/01-stack.md` — approved architect content (or stub)
+6. `docs/design/02-security.md` — approved security-engineer content (or stub)
+7. `docs/design/03-performance.md` — stub
+8. `docs/design/04-metrics.md` — stub
+9. `docs/design/05-data-model.md` — approved architect content (or stub)
+10. `docs/design/06-integrations.md` — stub
+11. `docs/design/07-error-handling.md` — stub
+12. `docs/design/08-glossary.md` — stub
+13. `docs/design/09-design-system.md` — approved ui-ux-designer content (or stub)
+14. `docs/design/adr/` — `.gitkeep`
+15. `docs/runbooks/README.md` — from `references/template-runbook.md`
+16. `docs/manual/` — `.gitkeep`
 
 ---
 
 ## GENERATE mode
 
-Use when: existing codebase with no `docs/mission.md`. Derive documentation from what's already built.
+Use when: existing codebase with no `docs/mission.md`. Derive documentation from
+what's already built.
 
 ### G.1 — Scan codebase for product signals
 
 Read in parallel:
-- `README.md` (root) — usually contains product description
-- Any existing files in `docs/` (partial documentation)
-- `package.json`, `.csproj`, `pyproject.toml`, or equivalent — project name and description
-- Top-level module/namespace names — signal domain structure
+- `README.md` (root)
+- Any existing files in `docs/`
+- `package.json`, `.csproj`, `pyproject.toml`, or equivalent
+- Top-level module/namespace names
 
-### G.1b — Deep technical analysis (Explore subagent)
-
-After the shallow scan, delegate a read-only technical analysis to an Explore subagent:
-
-```
-Analyze this codebase and return:
-1. Main technology stack (languages, frameworks, versions — infer from config files and imports)
-2. Top-level domains or bounded contexts (from namespaces, modules, folder structure)
-3. Key external integrations (APIs, databases, services called)
-4. Architectural pattern (monolith, layered, event-driven, microservices, etc.)
-5. Any notable design patterns used (repository, CQRS, etc.)
-
-Do not modify any files. Return findings only.
-```
-
-Merge subagent findings with G.1 results. The subagent's technical depth will populate `00-overview.md` (architecture section), `01-stack.md`, `05-data-model.md`, and `06-integrations.md` stubs with real inferences instead of TBD.
-
-After scanning, assess signal quality:
-- If `README.md` is missing or has fewer than 5 meaningful lines → stop and report:
+Assess signal quality:
+- If `README.md` is missing or fewer than 5 meaningful lines → stop and report:
   ```
   ─────────────────────────────────────────────────
   Not enough product signals to generate documentation.
@@ -239,46 +284,85 @@ After scanning, assess signal quality:
        and create both README.md and docs/ in one pass
   ─────────────────────────────────────────────────
   ```
-  Wait for developer choice. Do not proceed with poor inferences.
+  Wait for developer choice. If `c)`: run INITIALIZE mode from I.1, then also write
+  `README.md` at root before creating docs/.
 
-  **If developer chooses c):** run the INITIALIZE conversational discovery (step I.1). Use the collected answers to:
-  1. Write `README.md` at project root first — concise, developer-facing (product name, one-paragraph purpose, primary users, main capabilities, getting started placeholder)
-  2. Then continue with INITIALIZE mode I.2 → I.3 to create the full `docs/` structure
+### G.2 — Deep technical analysis (Explore subagent)
 
-  README.md is a product artifact. Writing it here is within scope when the developer explicitly requests it.
-
-### G.2 — Propose derived content
-
-Present findings to developer:
+Only run if G.1 signals are sufficient. Delegate read-only technical analysis:
 
 ```
-─────────────────────────────────────────────────
-/spec-os-product — Generate (from codebase)
-─────────────────────────────────────────────────
+Analyze this codebase and return:
+1. Main technology stack (languages, frameworks, versions)
+2. Top-level domains or bounded contexts (modules, folder structure)
+3. Key external integrations (APIs, databases, services)
+4. Architectural pattern (monolith, layered, event-driven, etc.)
+5. Core data entities and their relationships
+6. Notable design patterns used
 
-Inferred from codebase:
-
-Product name:    {inferred from README.md}
-Purpose:         {inferred from README.md}
-Main domains:    {inferred from codebase analysis}
-Stack:           {inferred from codebase analysis}
-Architecture:    {inferred from codebase analysis}
-
-Proposed mission.md content:
-{full draft}
-
-─────────────────────────────────────────────────
-Accept as-is? [y / edit / stop]
+Do not modify any files. Return findings only.
 ```
 
-On `edit`: developer provides corrections. Revise and re-present.
+### G.3 — Invoke product-owner
 
-### G.3 — Write files
+Read reference templates (`template-mission.md`, `template-roadmap.md`).
 
-Read all reference templates before writing (same as INITIALIZE mode — see I.3 for the list).
-Follow the same creation order as INITIALIZE mode.
+Invoke `.claude/agents/product-owner` via Agent tool with:
+- README.md content and any existing docs
+- Explore subagent findings (domain signals, product purpose inferred from codebase)
+- Templates content
+- Instruction: derive and propose `docs/mission.md` and `docs/roadmap.md` from the
+  codebase signals. Mark what is inferred vs confirmed. Propose — do not write files.
 
-Same structure as INITIALIZE mode. Mark fields that could not be inferred as `TBD — fill in manually`.
+Gate with developer — same format as I.3.
+
+### G.4 — Invoke architect
+
+If `spec-os/standards/` exists: read `spec-os/standards/index.yml`, load architecture-
+relevant standards files, include as `standards` context.
+
+Invoke `.claude/agents/architect` via Agent tool with:
+- Approved mission.md content
+- Explore subagent full findings
+- Standards (if available)
+- Instruction: propose `docs/design/00-overview.md`, `docs/design/01-stack.md`, and
+  `docs/design/05-data-model.md` derived from the codebase analysis. Flag gaps where
+  inferences are uncertain. Propose — do not write files.
+
+Gate per doc — same format as I.4.
+
+### G.5 — Invoke security-engineer
+
+If `spec-os/standards/` exists: load security-relevant standards.
+
+Invoke `.claude/agents/security-engineer` via Agent tool in Modo auditoría with:
+- Approved 01-stack.md content
+- Approved 00-overview.md content
+- Standards (if available)
+- Instruction: audit existing codebase for security posture and propose
+  `docs/design/02-security.md`. Include findings and recommended improvements.
+  Propose — do not write files.
+
+Gate — same format as I.5.
+
+### G.6 — Invoke ui-ux-designer
+
+If `spec-os/standards/` exists: load frontend-relevant standards.
+
+Invoke `.claude/agents/ui-ux-designer` via Agent tool with:
+- Approved mission.md content
+- Approved 01-stack.md content
+- Existing UI patterns found in the codebase (from Explore subagent)
+- Standards (if available)
+- Instruction: derive and propose `docs/design/09-design-system.md` from existing
+  UI code and patterns. Propose — do not write files.
+
+Gate — same format as I.6.
+
+### G.7 — Write all approved content
+
+Follow same creation order as INITIALIZE mode (I.7).
+Mark fields that could not be inferred as `TBD — fill in manually`.
 
 ---
 
@@ -288,61 +372,60 @@ Use when: `docs/mission.md` exists and needs updating.
 
 ### U.1 — Read current state
 
-Read all existing files in `docs/`:
-- `docs/mission.md`
-- `docs/roadmap.md`
-- Any other files in `docs/design/`
-
-If `spec-os/` exists (framework already installed), also read:
-- `spec-os/specs/_index.md` — registered domains and their relationships
-- `spec-os/specs/{domain}/spec.md` for each domain — understand what's actually been built
-- `spec-os/standards/backend/` and `spec-os/standards/frontend/` — confirm real stack in use
-
-Use this additional context to detect stale or inconsistent product docs (e.g., a domain exists in spec-os/specs/ but is not mentioned in mission.md scope).
+Read all existing files in `docs/`. If `spec-os/` exists, also read:
+- `spec-os/specs/_index.md` — registered domains
+- `spec-os/standards/` — confirm real stack in use
 
 ### U.2 — Identify what needs updating
-
-Ask developer what changed:
 
 ```
 ─────────────────────────────────────────────────
 /spec-os-product — Update
 ─────────────────────────────────────────────────
 Current docs found:
-  docs/mission.md      (last updated: {date from file})
-  docs/roadmap.md      (last updated: {date from file})
+  docs/mission.md      (last updated: {date})
+  docs/roadmap.md      (last updated: {date})
   docs/design/{files}
 
 What needs updating?
-  a) Mission changed (product purpose, users, scope)
-  b) Roadmap update (current focus, future capabilities)
-  c) Design doc update (specific file)
-  d) Add new design doc or ADR
-  e) Full refresh (scan all and propose updates)
+  a) Mission or roadmap → product-owner
+  b) Architecture or stack → architect
+  c) Security strategy → security-engineer
+  d) Design system → ui-ux-designer
+  e) Other design doc → skill writes directly
+  f) Add new ADR → skill writes from template
+  g) Full refresh → invoke all agents
 ─────────────────────────────────────────────────
 ```
 
-### U.3 — Load relevant reference templates
+### U.3 — Invoke relevant agent
 
-Before drafting any changes, read the template for each artifact being updated:
+Based on developer selection, read the relevant standard file if `spec-os/standards/`
+exists, then invoke the mapped agent:
 
-| Area selected | Template to read |
-|---------------|-----------------|
-| a) Mission | `references/template-mission.md` |
-| b) Roadmap | `references/template-roadmap.md` |
-| c) Design doc update | `references/template-design.md` |
-| d) New design doc | `references/template-design.md` → also update `docs/design/README.md` index |
-| d) New ADR | `references/template-adr.md` → also update `docs/design/adr/README.md` index |
-| e) Full refresh | all templates |
+| Selection | Agent | Doc(s) |
+|---|---|---|
+| a) Mission / Roadmap | `product-owner` | mission.md, roadmap.md |
+| b) Architecture / Stack | `architect` | 00-overview, 01-stack, 05-data-model |
+| c) Security | `security-engineer` | 02-security.md |
+| d) Design system | `ui-ux-designer` | 09-design-system.md |
+| e) Other doc | skill writes directly | specific file |
+| f) New ADR | skill writes from `references/template-adr.md` | adr/{slug}.md |
+| g) Full refresh | all agents | all docs |
 
-### U.4 — Propose specific changes
+Pass to each agent:
+- Current content of the doc(s) being updated
+- Relevant standards (if available)
+- Instruction: propose targeted updates — not a full rewrite unless content is
+  significantly stale. Propose — do not write files.
 
-For each selected area, read the current content and propose a targeted diff. Do not rewrite the entire file — propose only the sections that need changing.
+### U.4 — Gate and write
 
-Present as:
+Present agent proposals as targeted diffs:
+
 ```
 ─────────────────────────────────────────────────
-Proposed update: docs/mission.md — Scope section
+Proposed update: docs/design/{file} — {section}
 ─────────────────────────────────────────────────
 BEFORE:
 {current content}
@@ -354,11 +437,7 @@ Apply? [y / n / edit]
 ─────────────────────────────────────────────────
 ```
 
-Wait for approval per section. Never bulk-apply.
-
-### U.5 — Write approved changes
-
-Write only approved sections. Update `Last updated` date in each modified file.
+Wait for approval per section. Update `Last updated` date in each modified file.
 
 ---
 
@@ -369,16 +448,15 @@ Write only approved sections. Update `Last updated` date in each modified file.
 
 Mode: {initialize | generate | update}
 
+Agents invoked: {list}
+
 Files written:
-  docs/mission.md      {created | updated}
-  docs/roadmap.md      {created | updated | unchanged}
-  docs/design/         {created | unchanged}
+  docs/mission.md      {created | updated | stub}
+  docs/roadmap.md      {created | updated | stub}
+  docs/design/         {created | updated}
 
 {If spec-os/ does not exist:}
 Product documentation ready. Next step: set up the framework.
-/spec-os-init will read docs/mission.md to pre-fill project name,
-description, and context — run it now to avoid re-entering that info.
-
 Run /spec-os-init to continue.
 
 {If spec-os/ already exists:}
@@ -392,12 +470,20 @@ If `skill-handoffs: explicit` (default): stop. Do not invoke `/spec-os-init` aut
 
 ## Rules
 
-- **Owns docs/ entirely.** This skill creates and modifies `docs/`. Other skills (notably `/spec-os-init`) read `docs/mission.md` but do not write it. Boundaries are strict (Decision 22).
-- **May write README.md only on explicit developer request.** When GENERATE mode detects no usable README and the developer chooses option c), this skill writes `README.md` at project root as part of the same pass. This is the only exception to the `docs/`-only boundary.
-- **Never touches spec-os/ or .claude/.** Those belong to `/spec-os-init`, `/spec-os-discover`, and `/spec-os-standard`.
-- **Propose before writing.** Every INITIALIZE, GENERATE, and UPDATE mode presents content to the developer before writing. No file is written without explicit approval.
-- **Stubs are acceptable.** It is better to create a stub with TBD placeholders than to block on incomplete information. Stubs can be updated with UPDATE mode.
-- **Roadmap is strategic, not tactical.** Roadmap items are not features with IDs. They are directional signals. Do not add tracker IDs or sprint references to roadmap.md.
+- **Owns docs/ entirely.** This skill creates and modifies `docs/`. Other skills read
+  `docs/mission.md` but do not write it. Boundaries are strict (Decision 22).
+- **Orchestrates, never fabricates.** Content for agent-owned docs comes from agents.
+  The skill does not write those sections itself unless the developer skips the agent.
+- **Propose before writing.** Every agent output is gated with the developer before
+  being written to disk. No file is written without explicit approval.
+- **Stubs are acceptable.** If the developer skips an agent or answers are incomplete,
+  create a stub with `TBD` placeholders. Stubs can be completed later with UPDATE mode.
+- **Standards injection when available.** If `spec-os/standards/` exists, read and pass
+  relevant standards to agents before invoking them (Decision B — session 2026-03-26).
+- **May write README.md only on explicit developer request.** When GENERATE mode detects
+  no usable README and the developer chooses option c), this skill writes `README.md`
+  at project root. This is the only exception to the `docs/`-only boundary.
+- **Roadmap is strategic, not tactical.** No tracker IDs or sprint references in roadmap.md.
 
 ---
 
@@ -405,6 +491,12 @@ If `skill-handoffs: explicit` (default): stop. Do not invoke `/spec-os-init` aut
 
 Watch for these signals:
 
-- **Developer frequently updates mission.md after /spec-os-brainstorm** → the initial product definition is too vague. Encourage more specificity in the Purpose and Scope sections at initialization time.
-- **GENERATE mode produces very poor inferences** → README/CLAUDE.md are sparse or missing. Suggest the developer add a proper README before running GENERATE.
-- **UPDATE mode is never run** → docs are going stale. Consider adding a reminder to CLAUDE.md to run `/spec-os-product update` at major milestones.
+- **Developer skips all agents** → product-owner and architect agents may not have enough
+  context to produce useful output. Consider improving the conversational discovery to
+  gather more technical context upfront.
+- **Developer frequently edits agent proposals** → agent prompts may need refinement.
+  Record what was consistently wrong and update the affected agent file.
+- **GENERATE mode produces poor inferences** → README.md is sparse. Suggest the developer
+  add a proper README before running GENERATE.
+- **UPDATE mode is never run** → docs are going stale. Consider adding a reminder to
+  CLAUDE.md to run `/spec-os-product update` at major milestones.

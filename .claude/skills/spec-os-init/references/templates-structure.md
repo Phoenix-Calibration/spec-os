@@ -24,16 +24,7 @@ project:
   cadence-format: sprint      # sprint | milestone | quarter | custom
 
 tracker:
-  default: {tracker-type}     # ado | github
-  repos:
-    - name: {repo-name}
-      type: {tracker-type}
-      # If ado:
-      organization: {https://dev.azure.com/org}
-      project: {ado-project-name}
-      # If github:
-      # org: {github-org}
-      # repo: {repo-name}
+  default: {ado | github | none}    # connection details managed by /spec-os-tracker in spec-os/tracker/
 
 workflow:
   approval-gates:
@@ -61,7 +52,7 @@ workflow:
 Project: {project-name}
 Description: {one-sentence description}
 Stack: {stack}
-Tracker: see spec-os/config.yaml
+Tracker: see spec-os/tracker/
 Standards: spec-os/standards/index.yml
 Framework: spec-os v1.0.0
 

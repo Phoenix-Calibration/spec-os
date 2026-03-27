@@ -27,7 +27,7 @@ Triage a reported bug, classify it as simple or complex, and prepare the minimum
 
 ## Step 1 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-bug
 
 Fetch the bug from the tracker. Extract: title, description, reproduction steps, expected vs actual behavior, affected area/labels, severity/priority if set.
@@ -154,12 +154,8 @@ last-updated: {ISO-date}
 - lessons-pending: []
 ```
 
-Create the required empty companion files so `/spec-os-implement` and `/spec-os-verify` do not fail:
-
-**`session-log.md`:**
-```markdown
-# Session Log — B{bug-id}
-```
+Create the required empty companion files so `/spec-os-verify` does not fail.
+Note: `session-log.md` is created by `/spec-os-implement` when it starts T01 — do not create it here.
 
 **`spec-delta.md`:**
 ```markdown
@@ -180,7 +176,6 @@ Create the required empty companion files so `/spec-os-implement` and `/spec-os-
 Created:
   spec-os/changes/B{bug-id}-{slug}/spec.md
   spec-os/changes/B{bug-id}-{slug}/tasks.md
-  spec-os/changes/B{bug-id}-{slug}/session-log.md
   spec-os/changes/B{bug-id}-{slug}/spec-delta.md
   spec-os/changes/B{bug-id}-{slug}/verify-report.md
 

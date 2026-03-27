@@ -27,7 +27,7 @@ Turn a raw idea or requirement into a structured `origin.md` with a resolved tra
 
 ## Step 1 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: search-features, create-feature, add-comment
 
 ---
@@ -58,8 +58,9 @@ Any known constraints or context I should be aware of?
 
 Read in parallel:
 - `docs/mission.md` — product purpose and audience (if exists)
+- `docs/roadmap.md` — strategic roadmap for context (if exists)
 - `spec-os/specs/_index.md` — domain list, to identify which domain(s) this might affect
-- Recent `origin.md` files in `spec-os/changes/` — to spot related or overlapping work
+- Recent `origin.md` files — glob: `spec-os/changes/*/origin.md` (read last 3 by modification date) — to spot related or overlapping work
 
 ---
 
@@ -137,21 +138,33 @@ Wait for developer choice.
 - Parent Epic: if initiative context provided an Epic ID, link to it
 - No Story Points — Features do not carry SP
 
-Store returned `feature-id`.
+Store returned `feature-id` and `tracker-url` from the tracker response.
+
+After resolving the Feature (option a or b): add a comment using `add-comment`:
+> `"brainstorm analysis: {real problem summary} → {proposed solution summary} (complexity: {level})"`
 
 **On no Feature (c):** `feature-id: none` in origin.md.
 
 ---
 
-## Step 6 — Create origin.md
+## Step 6 — Create origin file
 
-Determine the feature folder name:
-- If `feature-id` is set: `F{id}-{cadence}-{slug}/` where cadence is current sprint/milestone from config.yaml
-- If `feature-id: none`: `{YYYYMMDD}-{slug}/`
+If `feature-id` is set: check if a folder matching `F{id}-*` already exists in `spec-os/changes/`.
 
-Create folder: `spec-os/changes/{folder}/`
+**If folder exists (adding requirement to existing Feature):**
+- Do NOT create a new folder
+- Use existing folder: `spec-os/changes/{existing-folder}/`
+- File name: `origin-{slug}.md` (alongside existing origin files)
+- Report to developer: "Adding to existing feature folder: spec-os/changes/{existing-folder}/"
 
-Write `origin.md` using the template from `docs/master-plan/04-templates.md`:
+**If folder does not exist (first requirement for this Feature):**
+- Folder name: `F{id}-{cadence}-{slug}/` where cadence is read from field `project.current-cadence` in `spec-os/config.yaml`
+- Create folder: `spec-os/changes/{folder}/`
+- File name: `origin.md`
+
+If `feature-id: none`: folder `{YYYYMMDD}-{slug}/`, file name: `origin.md`.
+
+Write origin file using the template from `docs/master-plan/04-templates.md`:
 
 ```markdown
 ---
@@ -159,7 +172,7 @@ date: {ISO-date}
 source: brainstorm-analyze
 feature-id: {F{id} | none}
 tracker-type: {ado | github | none}
-tracker-url: {full URL | none}
+tracker-url: {URL returned by tracker on create/link in Step 5 | none}
 complexity: {simple | medium | complex}
 ---
 

@@ -24,7 +24,7 @@ Update `docs/manual/{domain}.md` to reflect the new or changed behavior document
 
 ## Step 0 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-us
 
 ---
@@ -48,7 +48,7 @@ If latest verify-report entry for this US is not PASS:
 
 ## Step 2 — Locate manual file
 
-Read `spec-os/specs/_index.md` to get domain name from spec.md frontmatter.
+Read domain name from `spec.md` frontmatter. Read `spec-os/specs/_index.md` to validate the domain exists.
 
 Check if `docs/manual/{domain}.md` exists:
 - If exists: read it fully

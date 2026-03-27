@@ -27,7 +27,7 @@ Validate that a completed User Story meets its Acceptance Criteria, passes all t
 
 ## Step 1 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-us, update-status, create-pr
 
 ---
@@ -42,53 +42,55 @@ Read in parallel:
 
 ---
 
-## Step 3 — TEST-WRITE (AC coverage audit)
+## Step 3 — QA AUDIT (coverage)
 
-Invoke `.claude/agents/test-writer` via Agent tool with:
+Invoke `/spec-os-inject` with keywords derived from the US title and domain, requesting
+testing standards. Store the result as `standards-paths` (list of file paths).
+
+Invoke `.claude/agents/qa-engineer` via Agent tool in Modo auditoría de cobertura with:
+- `user-story`: US ID and title
 - `spec-path`: path to spec.md
 - `test-scope`: union of all `test-scope` values from US tasks
-- `standards`: injected testing standards (from `/spec-os-inject`)
-- `task-id`: US-level context
+- `ac-list`: AC list from spec.md Scenarios
+- `standards-paths`: [list of paths from /spec-os-inject]
 
-Present test-writer proposal to developer:
+Present qa-engineer's coverage proposal to developer:
 
 ```
 ─────────────────────────────────────────────────
 AC test coverage audit — US #{id}
 ─────────────────────────────────────────────────
-{test-writer proposal — gaps at US level}
+{qa-engineer proposal — gaps and proposed tests}
 ─────────────────────────────────────────────────
 Add these tests before verification run? [y / n / edit]
 ```
 
-On `n`: proceed without new tests (developer accepts coverage risk — noted in verify-report).
+On `n`: proceed without new tests (developer accepts coverage risk — noted in verify-report.md).
 
 ---
 
-## Step 4 — TEST-RUN
+## Step 4 — QA EXECUTE & REPORT
 
-Invoke `.claude/agents/test-runner` via Agent tool for three passes:
+Invoke `.claude/agents/qa-engineer` via Agent tool in Modo ejecución y reporte with:
+- `user-story`: US ID and title
+- `spec-path`: path to spec.md
+- `test-command`: project test command
+- `ac-list`: AC list from spec.md Scenarios
+- `approved-tests`: tests approved in Step 3 (empty if developer declined)
+- `feature-path`: path to feature folder in `spec-os/changes/`
+- `standards-paths`: standards-paths from Step 3
 
-**Unit tests:**
-- `test-command`: project unit test command
-- `test-files`: test-scope files from all US tasks + any new tests from Step 3
+qa-engineer writes tests, runs the full suite, and writes `changes/{feature}/verify-report.md`.
 
-**AC scenario tests** (if AC tests are in a separate suite):
-- `test-command`: AC/integration test command
-- `test-files`: AC test files
+Read `changes/{feature}/verify-report.md` — check the Decisión field.
 
-**Integration tests** (if project has an integration suite):
-- `test-command`: integration test command
-
-Collect all results.
-
-**On any FAIL:**
+**On FAIL:**
 ```
 ─────────────────────────────────────────────────
-Tests failed — verify cannot proceed.
-{test-runner report}
+QA FAIL — verify cannot proceed.
+{verify-report.md — Decisión section}
 
-Responsible task: {T-ID derived from failing test file/scope}
+Responsible task: {T-ID derived from failing test/AC}
 
 Options:
 a) Route to /spec-os-implement {T-ID} to fix
@@ -96,7 +98,7 @@ b) Inspect manually — stop verify here
 ─────────────────────────────────────────────────
 ```
 
-Write a FAIL entry to `verify-report.md` and wait for developer decision [gate]. Do not create PR.
+Wait for developer decision [gate]. Do not create PR.
 
 ---
 
@@ -108,7 +110,7 @@ Run all checks. Accumulate findings — do not stop on first failure.
 Read `git diff --name-only` for all commits in this US. Verify all changed files are within the declared `scope` fields of the US tasks. Flag any out-of-scope changes.
 
 **Check 2 — Conventions compliance:**
-Load standards via `/spec-os-inject` (task keywords = US title + domain). Scan changed files for obvious violations of loaded standards (naming, structure, patterns). This is a heuristic scan, not a linter — flag clear violations only.
+Invoke `/spec-os-inject` → get matched file paths. Read each file at the returned paths. Scan changed files for obvious violations (naming, structure, patterns). This is a heuristic scan, not a linter — flag clear violations only.
 
 **Check 3 — DoD completeness:**
 Read `spec.md` Definition of Done. Verify each checkbox:
@@ -157,7 +159,7 @@ Update tasks.md frontmatter → status: in-review
 - Summary from spec.md Scope
 - US title and tracker URL
 - AC list from spec.md Scenarios (checked)
-- Test counts from test-runner reports
+- Test counts from `changes/{feature}/verify-report.md`
 - Files changed from task scopes
 - spec-os/changes/{feature}/ links
 - **Autolink to tracker US in PR body:**
@@ -237,6 +239,6 @@ Sync ran automatically as part of PR creation (always automatic — see Decision
 Watch for these signals after each session:
 
 - **Scope compliance violations found frequently** → tasks.md scope fields are too broad or not respected by dev-agent. Tighten scope definitions in `/spec-os-plan` guidance.
-- **test-writer finds many gaps at verify time** → coverage was insufficient during inner loops. Consider increasing test-scope detail in task planning.
+- **qa-engineer FAIL rate is high** → tasks may lack test-scope detail suficiente. Revisá la especificidad de los ACs en spec.md y el campo `test-scope` en tasks.md.
 - **Check 2 (conventions) fires on every US** → standards are not being injected effectively in `/spec-os-implement`. Check index.yml keyword matching.
 - **Developer waives findings frequently** → DoD criteria may be set too strictly for this project. Consider revising spec.md DoD template.

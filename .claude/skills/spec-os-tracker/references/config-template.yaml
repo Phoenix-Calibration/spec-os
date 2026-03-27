@@ -1,0 +1,17 @@
+# spec-os tracker configuration
+# This file is owned by /spec-os-tracker — do not edit manually.
+# Auth tokens and PATs must NOT be stored here. Use your secret manager.
+
+tracker:
+  default: {type}           # ado | github — used when repo name cannot be resolved
+  repos:
+    - name: {repo-name}     # must match the repo name in git remote
+      type: {type}          # ado | github
+
+      # --- ADO fields (fill if type: ado) ---
+      organization: {https://dev.azure.com/your-org}
+      project: {your-ado-project-name}
+
+      # --- GitHub fields (fill if type: github) ---
+      # org: {your-github-org}
+      # repo: {your-github-repo-name}

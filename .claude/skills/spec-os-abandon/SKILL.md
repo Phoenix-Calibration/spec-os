@@ -27,7 +27,7 @@ Formally close a feature that will not be completed — marking all artifacts as
 
 ## Step 1 — Tracker Resolution
 
-Read `.claude/shared/tracker-adapter.md` and apply the Tracker Resolution block.
+Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-feature, update-status
 
 ---
@@ -118,7 +118,7 @@ On `n`: mark all pending lessons as `pending: false` with a note: `abandoned —
 
 **tasks.md:** Set `status: abandoned`. Add `abandoned-date: {ISO-date}`.
 
-**session-log.md:** Append abandon record:
+**session-log.md:** If the file exists (at least one `/spec-os-implement` session ran): append abandon record. If the file does not exist (no implement session ran — all tasks were `planned`): skip — there is no session context to preserve.
 
 ```markdown
 ## ABANDONED — {ISO-date}

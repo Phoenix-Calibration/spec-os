@@ -1,9 +1,9 @@
 # Templates — Standards Layer Files
 
-All files under `spec-os/standards/` created by `/spec-os-init`.
+Structural reference for `spec-os/standards/` files. Used by `/spec-os-discover` when proposing content for each standard. Defines the expected sections per file and the `index.yml` schema.
 
 > Note: Only write entries in `index.yml` and only create standard files for the stacks
-> declared in `config.yaml`. Do not create stub files for unused stacks.
+> declared in `config.yaml`. Do not create files for unused stacks.
 
 ---
 
@@ -74,7 +74,7 @@ frontend:
 ```markdown
 # Naming Conventions
 
-> Status: STUB — populate with project-specific conventions
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: naming, class, variable, file, convention
 
 ## File naming
@@ -95,7 +95,7 @@ frontend:
 ```markdown
 # Commit Conventions
 
-> Status: STUB — populate with project-specific conventions
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: commit, git, message, branch
 
 ## Commit message format
@@ -124,7 +124,7 @@ Include feature ID and task ID in every commit message.
 ```markdown
 # Security Standards
 
-> Status: STUB — populate with project-specific security rules
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: security, auth, credentials, secrets, env
 
 ## Credentials
@@ -173,7 +173,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Backend Architecture
 
-> Status: STUB — populate with project-specific architecture rules
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: architecture, domain, layer, cqrs, aggregate, repository
 
 ## Layer structure
@@ -190,7 +190,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Backend Patterns
 
-> Status: STUB — populate with project-specific patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: pattern, solid, di, injection, service, handler
 
 ## Dependency injection
@@ -207,7 +207,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Backend Testing
 
-> Status: STUB — populate with project-specific testing conventions
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: test, unit, integration, coverage, mock
 
 ## Unit test conventions
@@ -226,7 +226,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Error Handling
 
-> Status: STUB — populate with project-specific error handling rules
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: error, exception, handling, response, status-code
 
 ## Exception strategy
@@ -243,7 +243,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # .NET / C# Standards
 
-> Status: STUB — populate with project-specific .NET patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: dotnet, csharp, net, aspnet, ef, entityframework, linq
 
 ## Async patterns
@@ -262,7 +262,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Python Standards
 
-> Status: STUB — populate with project-specific Python patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: python, fastapi, django, sqlalchemy, pydantic, async
 
 ## Type hints
@@ -281,7 +281,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Odoo Standards
 
-> Status: STUB — populate with project-specific Odoo patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: odoo, orm, module, wizard, inherit, manifest
 
 ## Module structure
@@ -300,7 +300,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Frontend Component Standards
 
-> Status: STUB — populate with project-specific component patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: component, react, props, composition, hooks
 
 ## Component architecture
@@ -317,7 +317,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # State Management
 
-> Status: STUB — populate with project-specific state patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: state, context, store, reducer, hook
 
 ## Local state
@@ -334,7 +334,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Frontend Testing
 
-> Status: STUB — populate with project-specific frontend test conventions
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: test, cypress, playwright, data-testid
 
 ## Component tests
@@ -351,7 +351,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # Next.js Standards
 
-> Status: STUB — populate with project-specific Next.js patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: nextjs, next, ssr, ssg, app-router, pages, server-component
 
 ## App Router conventions
@@ -370,7 +370,7 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 ```markdown
 # React Standards
 
-> Status: STUB — populate with project-specific React patterns
+> Status: {EXTRACTED | DESIGN-DERIVED | EXTRACTED + DESIGN-DERIVED} — {ISO-date}
 > Managed by: /spec-os-standard | Keywords: react, hooks, component, props, state, context, memo
 
 ## Hook patterns
