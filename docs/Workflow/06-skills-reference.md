@@ -1,6 +1,6 @@
-# Skills
+# Skills Reference
 
-Reference for all `/spec-os-*` skills. For workflow patterns and when to use each skill, see [Workflows](workflows.md).
+Complete reference for all `/spec-os-*` skills. For workflow patterns and when to use each skill, see [Workflow Overview](01-workflow-overview.md).
 
 ## Quick Reference
 
@@ -10,6 +10,7 @@ Reference for all `/spec-os-*` skills. For workflow patterns and when to use eac
 |-------|---------|
 | `/spec-os-product` | Create product documentation (`docs/`: mission, roadmap, design) |
 | `/spec-os-init` | Install spec-os framework structure in a project |
+| `/spec-os-tracker` | Configure tracker integration (ADO, GitHub) for a project |
 
 ### Portfolio skill — Claude Desktop personal skill
 
@@ -17,26 +18,42 @@ Reference for all `/spec-os-*` skills. For workflow patterns and when to use eac
 |-------|---------|
 | `/spec-os-explore` | Analyze a business initiative across multiple repos → generate context packages |
 
-### Primary skills — main workflow
+### Phase 1 — Design skills *(Team Lead / Product Owner)*
 
 | Skill | Purpose |
 |-------|---------|
 | `/spec-os-brainstorm` | Analyze an idea → create `origin.md`, resolve Feature in tracker |
-| `/spec-os-bug` | Analyze a bug → route to simple or complex path |
 | `/spec-os-design` | Write technical spec from `origin.md` |
 | `/spec-os-plan` | Decompose spec into User Stories and atomic tasks |
-| `/spec-os-implement` | Execute one task (one session, one commit) |
-| `/spec-os-verify` | Quality gate per User Story |
 
-### Support skills — standards and maintenance
+### Phase 2 — Implementation skills *(Developer)*
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-implement` | Execute one task (one session, one commit) |
+| `/spec-os-verify` | Quality gate per User Story → PR |
+| `/spec-os-doc` | Update user documentation (conditional on `doc-impact`) |
+| `/spec-os-sync` | Sync lessons to knowledge base (always last in chain) |
+
+### Phase 3 — Framework quality
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-audit` | Capture framework quality signals after a session |
+
+### Bug path
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-bug` | Analyze a bug → route to simple or complex path |
+
+### Maintenance
 
 | Skill | Purpose |
 |-------|---------|
 | `/spec-os-discover` | Scan codebase → extract coding conventions into standards |
 | `/spec-os-inject` | Load relevant standards for the current task (called by implement) |
 | `/spec-os-standard` | Update or create a standard |
-| `/spec-os-doc` | Update user documentation (conditional on `ux-impact`) |
-| `/spec-os-sync` | Sync lessons to knowledge base (always last in chain) |
 | `/spec-os-abandon` | Close a feature without completing it |
 | `/spec-os-clean` | Clean up knowledge base + archive completed features (release close) |
 
@@ -90,8 +107,6 @@ spec-os/specs/_index.md
 spec-os/specs/{domain}/spec.md  (one per declared domain)
 spec-os/specs/knowledge-base.md
 spec-os/changes/              (empty)
-.claude/agents/backend-dev.md
-.claude/agents/frontend-dev.md
 ```
 
 **Example:**
@@ -130,6 +145,35 @@ AI:  spec-os v1.0.0 installed.
 - Run `/spec-os-product` first if you want `docs/mission.md` to seed the config description
 - After init, run `/spec-os-discover` to replace standard stubs with your actual conventions
 - Use `update` mode to add domains as your project grows
+
+---
+
+### `/spec-os-tracker`
+
+Set up and manage tracker integration for a project. Creates `spec-os/tracker/` with the adapter config and MCP mappings. Run after `/spec-os-init` or whenever tracker settings need updating.
+
+**Syntax:**
+```text
+/spec-os-tracker
+```
+
+**What it does:**
+- Asks for tracker type: `ado`, `github`, or `none`
+- Collects connection details (organization URL, project name, repo name)
+- Creates `spec-os/tracker/config.yaml` (type) and `spec-os/tracker/{type}.md` (full adapter with MCP mappings and required env vars)
+- Validates the connection if credentials are available
+
+**What it creates:**
+```
+spec-os/tracker/
+├── config.yaml     ← tracker type declaration
+└── ado.md          ← or github.md — adapter with MCP operation mappings
+```
+
+**Tips:**
+- Re-run to update connection details or switch tracker type
+- The adapter file (`ado.md` / `github.md`) documents the required environment variables for MCP authentication
+- If `spec-os/tracker/` does not exist, all skills skip tracker operations gracefully
 
 ---
 
@@ -181,7 +225,7 @@ Analyze an idea or requirement. Identify the real problem. Resolve or create the
   - If found → proposes linking → dev confirms → `feature-id` stored in `origin.md`
   - If not found → proposes creating a new Feature → dev confirms → creates it → `feature-id` stored
 - Creates `origin.md` in `spec-os/changes/{folder}/`
-- Notifies dev → proposes handoff to `/spec-os-create`
+- Notifies dev → proposes handoff to `/spec-os-design`
 
 **Example:**
 ```text
@@ -250,7 +294,7 @@ spec-os/changes/B1847-equipment-export-null/
 
 ### `/spec-os-design`
 
-Write the technical specification for a feature from `origin.md`. Acts as the tech lead / architect role — translates the "what and why" from brainstorm into a formal observable behavior contract.
+Write the technical specification for a feature from `origin.md`. Translates the "what and why" from brainstorm into a formal observable behavior contract.
 
 **Syntax:**
 ```text
@@ -279,12 +323,8 @@ Write the technical specification for a feature from `origin.md`. Acts as the te
 ```
 spec-os/changes/{feature}/
 ├── spec.md          (technical spec — owned by this skill for full lifecycle)
-├── spec-delta.md    (empty — ready for evolution tracking)
-├── session-log.md   (empty)
-└── verify-report.md (empty)
+└── spec-delta.md    (empty — ready for evolution tracking)
 ```
-
-`origin.md` is preserved as-is.
 
 **Update mode** (invoked by `/spec-os-implement` during RECONCILE):
 Proposes spec changes for dev approval → writes delta entry in `spec-delta.md` → returns list of tasks affected for `/spec-os-plan` Update mode.
@@ -294,21 +334,13 @@ Proposes spec changes for dev approval → writes delta entry in `spec-delta.md`
 You: /spec-os-design
 
 AI:  Found: spec-os/changes/F042-S24-equipment-notifications/origin.md
-     Feature: F042 — Equipment status email notifications
-     Proceeding? [y/n]
-
-You: y
-
-AI:  Reading tracker Feature, docs/design/, domain spec...
-
-     Spec-level: full
-     Reason: new feature with observable API contract and domain state changes
+     Spec-level: full (observable API contract + domain state changes)
      Confirm? [y / change]
 
 You: y
 
 AI:  ─────────────────────────────────────────────────
-     Proposed: spec-os/changes/F042-S24-equipment-notifications/spec.md
+     Proposed: spec.md
      ─────────────────────────────────────────────────
      [full spec draft]
      ─────────────────────────────────────────────────
@@ -316,8 +348,7 @@ AI:  ─────────────────────────
 
 You: y
 
-AI:  /spec-os-design complete.
-     Created: spec.md (spec-level: full), spec-delta.md, session-log.md, verify-report.md
+AI:  Created: spec.md (spec-level: full), spec-delta.md
      Run /spec-os-plan to continue.
 ```
 
@@ -330,7 +361,7 @@ AI:  /spec-os-design complete.
 
 ### `/spec-os-plan`
 
-Decompose the technical spec into User Stories with Acceptance Criteria and atomic implementation tasks. Acts as the scrum master / tech lead operational role — turns the spec contract into a concrete execution plan.
+Decompose the technical spec into User Stories with Acceptance Criteria and atomic implementation tasks.
 
 **Syntax:**
 ```text
@@ -365,8 +396,8 @@ spec-os/changes/{feature}/tasks.md
 | `scope` | File paths |
 | `done-when` | Verifiable criterion |
 | `context-level` | Derived from spec-level, elevated per task risk |
-| `doc-impact` | `true` if change requires documentation update (UI, API contract, business rule, permissions) |
-| `test-scope` | Existing test files relevant to this task — read by test-writer before proposing new tests |
+| `doc-impact` | `true` if change requires documentation update |
+| `test-scope` | Existing test files relevant to this task |
 | `claimed-by` | Always `—` (set by implement at session start) |
 | `status` | Always `planned` |
 | `lessons-pending` | Always `[]` |
@@ -374,50 +405,10 @@ spec-os/changes/{feature}/tasks.md
 **Update mode** (invoked by `/spec-os-implement` during RECONCILE after a spec change):
 Adjusts task scope/done-when, adds new tasks, or proposes US split. Dev approves before writing.
 
-**Example:**
-```text
-You: /spec-os-plan
-
-AI:  Found: spec-os/changes/F042-S24-equipment-notifications/spec.md
-     Proceeding? [y/n]
-
-You: y
-
-AI:  ─────────────────────────────────────────────────
-     Proposed User Stories for F042:
-     ─────────────────────────────────────────────────
-     US #1 — Configure notification recipients
-       Role: As an admin, I want to configure recipients per equipment type
-       SP: 3
-       AC-1: GIVEN an equipment type exists WHEN admin sets recipients
-             THEN the configuration is saved and confirmable
-
-     US #2 — Send status change notification
-       SP: 5
-       AC-1: GIVEN a recipient is configured WHEN equipment status changes
-             THEN an email is sent within 30 seconds
-     ─────────────────────────────────────────────────
-     Create these User Stories in ADO? [y / n / edit]
-
-You: y
-
-AI:  Created US #182, US #183 in ADO.
-
-     [proposes full tasks.md]
-     Create tasks.md? [y / n / edit]
-
-You: y
-
-AI:  /spec-os-plan complete.
-     2 US created · 6 tasks planned
-     Run /spec-os-implement T01 to begin.
-```
-
 **Tips:**
 - Story Points are set **exclusively** here — `origin.md` carries only `complexity` (directional, not SP)
 - Always confirm the US list before task decomposition — rework at US level is expensive
-- `doc-impact: false` on all tasks means `/spec-os-doc` will never run for this feature — set it accurately
-- `test-scope: none` is valid but means test-writer starts with no coverage context — fill it when you know the relevant test files
+- `doc-impact: false` on all tasks means `/spec-os-doc` will never run for this feature
 
 ---
 
@@ -444,7 +435,7 @@ LOAD:       context by tier (1 always; 2-3 per context-level)
 STANDARDS:  /spec-os-inject with task keywords + stack
 CONFIRM:    notify dev of agent type → wait for approval [gate]
 ┌─ INNER LOOP (max-iterations: config.yaml, default 3) ──────────────┐
-│  test-writer: audits test-scope → proposes gaps [gate]             │
+│  qa-engineer: audits test-scope → proposes gaps [gate]             │
 │  dev-agent:   implements code + approved tests → commits           │
 │  test-runner: runs unit tests                                      │
 │    PASS → exit  │  FAIL → dev-agent corrects → loop               │
@@ -502,12 +493,12 @@ Quality gate for a User Story. Runs after all tasks in the US are done.
 ```
 
 **Flow:**
-1. **TEST-WRITE** — test-writer audits US-level AC coverage → proposes gaps [gate]
-2. **TEST-RUN** — test-runner executes unit + AC + integration tests
+1. **AUDIT** — qa-engineer audits US-level AC coverage → proposes gaps [gate]
+2. **EXECUTE** — qa-engineer writes approved tests, runs full suite, writes `verify-report.md`
 3. **CHECKS** — scope compliance, conventions, DoD, no placeholders, spec-delta completeness
 
 **Results:**
-- **PASS** → creates PR, updates tracker US to `in-review`, runs `/spec-os-sync` automatically (lesson sync), offers `/spec-os-doc` handoff if `doc-impact: true` on any task
+- **PASS** → creates PR, updates tracker US to `in-review`, runs `/spec-os-sync`, offers `/spec-os-doc` handoff if `doc-impact: true`
 - **FAIL** → writes FAIL entry to `verify-report.md` → identifies responsible T-ID → routes to `/spec-os-implement`
 
 Writes `verify-report.md` entry in every case.
@@ -516,7 +507,7 @@ Writes `verify-report.md` entry in every case.
 
 ### `/spec-os-discover`
 
-Scan the codebase and extract real coding conventions into `spec-os/standards/` files. Replaces stubs written by `/spec-os-init` with what actually exists in the code.
+Scan the codebase and extract real coding conventions into `spec-os/standards/` files.
 
 **Syntax:**
 ```text
@@ -535,40 +526,16 @@ Scan the codebase and extract real coding conventions into `spec-os/standards/` 
 - Proposes each standard to the developer one at a time — never writes without approval
 - Updates `Status: STUB` to `Status: EXTRACTED — {date}` on approved files
 
-**Example:**
-```text
-You: /spec-os-discover backend
-
-AI:  Scope: backend | Stack: dotnet
-     Standards to scan: architecture, patterns, testing, error-handling, dotnet
-
-     ─────────────────────────────────────────────────
-     Standard: spec-os/standards/backend/testing.md
-     ─────────────────────────────────────────────────
-     # Backend Testing
-     > Status: EXTRACTED — 2026-03-22
-     > Managed by: /spec-os-standard | Keywords: test, unit, integration, coverage, mock
-
-     ## Test file naming
-     {ClassName}Tests.cs, located in a parallel test project...
-
-     Write this standard? [y / n / edit]
-
-You: y
-
-AI:  Written. Next: spec-os/standards/backend/error-handling.md...
-```
-
 **Tips:**
 - Run after `/spec-os-init` to replace stubs with actual conventions
 - Re-run with a specific category after a major refactor
-- If the codebase has mixed patterns, `/spec-os-discover` will name them — use `/spec-os-standard` to record which one is canonical
+- If the codebase has mixed patterns, use `/spec-os-standard` to record which one is canonical
 
 ---
 
 ### `/spec-os-inject`
 
-Load only the standards relevant to the current task and return their content for injection into a subagent's context. Called internally by `/spec-os-implement` — not typically invoked directly.
+Load only the standards relevant to the current task. Called internally by `/spec-os-implement` — not typically invoked directly.
 
 **Syntax:**
 ```text
@@ -583,15 +550,9 @@ Load only the standards relevant to the current task and return their content fo
 
 **What it does:**
 - Reads `spec-os/standards/index.yml`
-- Enriches keywords with the project stack from `spec-os/config.yaml` (and the feature's `spec.md` if in scope)
 - Matches keywords against each standard's keyword list
 - Filters by `subagent-type`: `backend` gets `global` + `backend`; `frontend` gets `global` + `frontend`
-- Returns the full content of all matched files — not summaries — so subagents get the complete rules
-- Missing files produce a warning and are skipped; injection continues with whatever is available
-
-**Tips:**
-- If the wrong standards are being injected, update the `keywords` field of the relevant standard using `/spec-os-standard`
-- If expected standards are missing from injection, run `/spec-os-discover` or `/spec-os-standard` to create them
+- Returns the **file paths** of all matched files — subagents receive paths and read each file directly
 
 ---
 
@@ -611,42 +572,9 @@ Update an existing standard or create a new one in `spec-os/standards/`. Every c
 
 **What it does:**
 - If `standard-path` exists: reads the current content, asks what to change, drafts and proposes the update
-- If `standard-path` doesn't exist: collects category, description, keywords, and content from the developer — then proposes the new file
+- If `standard-path` doesn't exist: collects category, description, keywords, and content — then proposes the new file
 - Shows the complete proposed file (not just a diff) for clear approval
-- Updates `spec-os/standards/index.yml` if keywords changed — essential for `/spec-os-inject` to pick up the standard
-
-**Example:**
-```text
-You: /spec-os-standard backend/error-handling
-
-AI:  Current: spec-os/standards/backend/error-handling.md
-     ────────────────────────────────────────────────────
-     # Error Handling
-     > Status: STUB — populate with project-specific rules
-     ...
-     ────────────────────────────────────────────────────
-     What would you like to change or add?
-
-You: We use Result<T> from ErrorOr. Never throw except for truly unexpected conditions.
-     API errors return ProblemDetails. Log all exceptions at Error level with context.
-
-AI:  Proposed: spec-os/standards/backend/error-handling.md
-     ────────────────────────────────────────────────────
-     # Error Handling
-     > Status: UPDATED — 2026-03-22
-     ...
-     Apply? [y / n / edit]
-
-You: y
-
-AI:  Written: spec-os/standards/backend/error-handling.md
-     index.yml unchanged (keywords unchanged).
-```
-
-**Tips:**
-- Use after `/spec-os-verify` surfaces a conventions violation — update the standard to prevent recurrence
-- Use when a session-log lesson is generalizable enough to become a project rule
-- Run after `/spec-os-discover` resolves a conflict — record the canonical decision
+- Updates `spec-os/standards/index.yml` if keywords changed
 
 ---
 
@@ -659,7 +587,7 @@ Sync pending lessons from session logs to the knowledge base. Runs automatically
 /spec-os-sync [feature-id] [us-id]
 ```
 
-**Lesson sync only** — no archival (that's `/spec-os-clean`). Idempotent — safe to re-run.
+Lesson sync only — no archival (that's `/spec-os-clean`). Idempotent — safe to re-run.
 
 Reads `session-log.md` lessons with `pending: true`. Filters to `generalizable: yes`. Validates domain tags against `_index.md`. Writes to `spec-os/specs/knowledge-base.md`. Marks synced lessons `pending: false`.
 
@@ -674,7 +602,30 @@ Update user-facing documentation. Conditional — only runs if the US has at lea
 /spec-os-doc [feature-id] [us-id]
 ```
 
-Reads spec.md + tracker US. Drafts `docs/manual/{domain}.md` update in plain language. Dev approves before writing. `/spec-os-sync` already ran at PR creation — no further handoffs needed.
+Reads `spec.md` + tracker US. Drafts `docs/manual/{domain}.md` update in plain language. Dev approves before writing.
+
+---
+
+### `/spec-os-audit`
+
+Capture framework quality signals after a session. Produces an entry in `spec-os/audit-log.md`.
+
+**Syntax:**
+```text
+/spec-os-audit [mode]
+```
+
+**Arguments:**
+| Argument | Required | Values |
+|----------|----------|--------|
+| `mode` | No | `context` \| `analyze` \| `feedback` — prompted if omitted |
+
+**Modes:**
+- `context` — analyzes current session history
+- `analyze` — reads feature artifacts (origin.md, spec.md, session-log.md)
+- `feedback` — guided Q&A with the developer
+
+`audit-analyst` produces a structured draft. Dev approves before it's written to `audit-log.md`.
 
 ---
 
@@ -687,13 +638,13 @@ Close a feature without completing it. Preserves all artifacts.
 /spec-os-abandon [feature-id] [reason]
 ```
 
-Asks for abandonment reason. Releases all claimed tasks. Updates `spec.md` + `tasks.md` status to `abandoned`. Updates tracker Feature to closed. Optionally syncs pending lessons before closing. Does NOT delete or move the folder — archival is `/spec-os-clean`'s responsibility at release close.
+Asks for abandonment reason. Releases all claimed tasks. Updates `spec.md` + `tasks.md` status to `abandoned`. Updates tracker Feature to closed. Does NOT delete or move the folder — archival is `/spec-os-clean`'s responsibility at release close.
 
 ---
 
 ### `/spec-os-clean`
 
-Maintenance skill for the spec-os knowledge layer. Run manually at sprint or release close — not part of the daily workflow.
+Maintenance skill for the spec-os knowledge layer. Run manually at sprint or release close.
 
 **Syntax:**
 ```text
@@ -705,13 +656,11 @@ Maintenance skill for the spec-os knowledge layer. Run manually at sprint or rel
 |----------|----------|--------|
 | `mode` | No | `kb` (knowledge base only) \| `archive` (archival only) — runs both if omitted |
 
-**Two responsibilities:**
-
 **Knowledge base cleanup (`kb`):**
-Scans `spec-os/specs/knowledge-base.md` for obsolete (from abandoned features), contradictory (two entries recommending opposite approaches), or invalid-domain entries. Proposes removals and corrections — dev approves each.
+Scans `spec-os/specs/knowledge-base.md` for obsolete, contradictory, or invalid-domain entries. Proposes removals and corrections — dev approves each.
 
 **Feature archival (`archive`):**
-Scans `spec-os/changes/` for folders with `status: done` or `status: abandoned`. Validates (PASS in verify-report, no active claims). Moves to `spec-os/archive/` — dev approves before any move.
+Scans `spec-os/changes/` for folders with `status: done` or `status: abandoned`. Moves to `spec-os/archive/` — dev approves before any move.
 
 ---
 
@@ -730,7 +679,7 @@ Analyze a business initiative that spans multiple repos. **Personal skill — in
 {YYYYMMDD-HHmm}-initiative-{slug}-{app}.md    ← one per affected app
 ```
 
-**Handoff:** developer takes each `{timestamp}-initiative-{slug}-{app}.md` and passes it to the corresponding repo's `/spec-os-brainstorm` as additional context.
+**Handoff:** take each `{timestamp}-initiative-{slug}-{app}.md` and pass it to the corresponding repo's `/spec-os-brainstorm` as additional context.
 
 **Tips:**
 - Install at `~/.claude/skills/spec-os-explore/`
@@ -741,6 +690,7 @@ Analyze a business initiative that spans multiple repos. **Personal skill — in
 
 ## Next Steps
 
-- [Getting Started](getting-started.md) — install and first walkthrough
-- [Concepts](concepts.md) — architecture and key ideas
-- [Workflows](workflows.md) — common patterns
+← [Back to Workflow Overview](01-workflow-overview.md)
+
+- [Getting Started](../Getting%20Started/01-overview.md) — install spec-os
+- [Concepts](../Concepts/00-concepts-overview.md) — understand the architecture

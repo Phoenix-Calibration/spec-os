@@ -20,18 +20,21 @@ This should be ambitious but directionally stable — it should not change with 
 
 ## Current focus
 {What the team is building right now, at a high level. This section changes most frequently.
-Describe themes or capabilities, not specific tasks.}
+Describe themes or capabilities, not specific tasks. Each item must have an expected outcome.}
 
-- {Current theme or capability 1}
-- {Current theme or capability 2}
+| Theme / Capability | Expected outcome | KPI | Target |
+|---|---|---|---|
+| {Current theme 1} | {what changes for users if this succeeds} | {metric} | {target} |
+| {Current theme 2} | {what changes for users if this succeeds} | {metric} | {target} |
 
 ## Potential future capabilities
 {Unordered list of capabilities that might be built — not committed, not prioritized.
-These are signals of intent, not promises. Remove items that are formally rejected.}
+Each item includes the outcome it would produce if built.
+Remove items that are formally rejected.}
 
-- {Possible future capability 1}
-- {Possible future capability 2}
-- {Possible future capability 3}
+- {Possible future capability 1} → *expected outcome: {what it would change}*
+- {Possible future capability 2} → *expected outcome: {what it would change}*
+- {Possible future capability 3} → *expected outcome: {what it would change}*
 
 ## Deliberately excluded
 {Capabilities that have been considered and formally rejected — with a brief reason.

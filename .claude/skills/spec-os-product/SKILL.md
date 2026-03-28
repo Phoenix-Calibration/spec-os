@@ -15,10 +15,14 @@ description: Create or update the product documentation layer (docs/). Use this 
 ## Goal
 
 Own the `docs/` layer entirely. Orchestrate the creation and update of product
-documentation by delegating to specialized agents — `product-owner`, `architect`,
-`security-engineer`, `ui-ux-designer` — and writing the approved outputs. Runs before
-`/spec-os-init` to give the framework product context and the team a stable reference
-for what the product is and why it exists.
+documentation by delegating to specialized agents — `market-researcher`, `product-owner`,
+`architect`, `security-engineer`, `ui-ux-designer` — and writing the approved outputs.
+Runs before `/spec-os-init` to give the framework product context and the team a stable
+reference for what the product is and why it exists.
+
+**Core principle: every product document must support MEASURABLE AND ACHIEVABLE RESULTS.**
+mission.md defines success metrics. roadmap.md defines expected outcomes per initiative.
+No initiative, capability, or goal is documented without a concrete, measurable outcome.
 
 ## Syntax
 
@@ -51,6 +55,31 @@ Report detected mode and reason. Proceed.
 ## INITIALIZE mode
 
 Use when: new project with no existing codebase.
+
+### I.0 — Market research (always run)
+
+Invoke `.claude/agents/market-researcher` via Agent tool with:
+- Any context already available: product name, idea description, files, URLs
+  provided by the developer in this session
+- Instruction: research the market, users, competitors, and value gaps for this
+  project. Produce a complete draft of `docs/market-research.md` including
+  the Measurable outcomes section with KPIs, baselines, and realistic targets.
+
+Present output to developer:
+
+```
+─────────────────────────────────────────────────
+market-researcher — docs/market-research.md
+─────────────────────────────────────────────────
+{market-researcher proposed content}
+─────────────────────────────────────────────────
+Accept? [y / edit / skip]
+  skip → proceeds without market research context
+─────────────────────────────────────────────────
+```
+
+If accepted or edited: write `docs/market-research.md` immediately.
+Pass approved content to all subsequent agent invocations as market context.
 
 ### I.1 — Conversational discovery
 
@@ -261,6 +290,20 @@ Create files in this order:
 Use when: existing codebase with no `docs/mission.md`. Derive documentation from
 what's already built.
 
+### G.0 — Market research (always run)
+
+Invoke `.claude/agents/market-researcher` via Agent tool with:
+- Any context available: README.md content, existing docs, URLs or files provided
+  by the developer in this session
+- Instruction: research the market, users, competitors, and value gaps for this
+  project based on the codebase signals. Produce a complete draft of
+  `docs/market-research.md` including the Measurable outcomes section with KPIs,
+  baselines, and realistic targets.
+
+Gate with developer — same format as I.0.
+If accepted or edited: write `docs/market-research.md` immediately.
+Pass approved content to all subsequent agent invocations as market context.
+
 ### G.1 — Scan codebase for product signals
 
 Read in parallel:
@@ -394,7 +437,8 @@ What needs updating?
   d) Design system → ui-ux-designer
   e) Other design doc → skill writes directly
   f) Add new ADR → skill writes from template
-  g) Full refresh → invoke all agents
+  g) Refresh market research → market-researcher
+  h) Full refresh → invoke all agents
 ─────────────────────────────────────────────────
 ```
 
@@ -484,6 +528,13 @@ If `skill-handoffs: explicit` (default): stop. Do not invoke `/spec-os-init` aut
   no usable README and the developer chooses option c), this skill writes `README.md`
   at project root. This is the only exception to the `docs/`-only boundary.
 - **Roadmap is strategic, not tactical.** No tracker IDs or sprint references in roadmap.md.
+- **Measurable outcomes are non-negotiable.** mission.md must have a Success metrics
+  section with concrete KPIs. roadmap.md must have an Expected outcome per initiative.
+  No doc is complete without measurable outcomes — stubs are acceptable but the section
+  must exist and be filled before the skill reports completion.
+- **market-researcher runs before product-owner.** Market evidence informs mission and
+  roadmap. If market-researcher is skipped, product-owner works without external
+  validation — note this gap in the generated docs.
 
 ---
 

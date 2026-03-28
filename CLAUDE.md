@@ -6,7 +6,7 @@ Project: spec-os
 Description: AI-assisted development framework combining standards management, spec tracking, and workflow skills for Claude Code
 Stack: markdown / framework (stack-agnostic)
 Tracker: N/A — this is the framework source repo
-Standards: docs/master-plan/ (design decisions and architecture)
+Standards: docs/ (framework documentation)
 Framework: spec-os v1.0.0 (this repo IS the framework)
 
 ## Agent behavior (immutable rules)
@@ -16,7 +16,7 @@ Framework: spec-os v1.0.0 (this repo IS the framework)
 - Max 3 clarifying questions at a time, one per topic
 - Always propose before applying — wait for approval
 - Document gaps as Suggested Improvements, never self-apply
-- When modifying SKILL.md files — read the corresponding design decisions in docs/master-plan/ first
+- When modifying SKILL.md files — read the corresponding design decisions in master-plan/ first
 
 ## Security boundaries
 
@@ -25,14 +25,15 @@ Framework: spec-os v1.0.0 (this repo IS the framework)
 
 ## This repo's structure
 
-- `docs/master-plan/` — complete design documentation (source of truth for all decisions)
+- `docs/` — user-facing framework documentation (concepts, getting started, skills, workflows)
+- `master-plan/` — internal design documentation (source of truth for all decisions)
 - `.claude/skills/` — skill source files (SKILL.md per skill)
-- `Knowlede Base/` — reference frameworks analyzed during design (read-only)
+- `Knowledge Base/` — reference frameworks analyzed during design (read-only)
 
 ## Development workflow
 
 This repo uses standard git workflow — no spec-os tracking for self-development.
-Design decisions are finalized in docs/master-plan/03-decisions.md.
+Design decisions are finalized in master-plan/03-decisions.md.
 
 ## Entry points
 

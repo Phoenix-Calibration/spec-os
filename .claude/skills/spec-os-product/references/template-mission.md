@@ -29,6 +29,15 @@ Each criterion should be verifiable from the user's perspective.}
 - {Observable outcome 1}
 - {Observable outcome 2}
 
+## Success metrics
+{Concrete, measurable KPIs that indicate the product is achieving its purpose.
+Derived from docs/market-research.md — Measurable outcomes section.
+Each metric must have a baseline and a realistic target.}
+
+| KPI | Baseline | Target | Timeframe | How to measure |
+|-----|----------|--------|-----------|----------------|
+| {metric name} | {current state or "not yet measured"} | {realistic target} | {3 / 6 / 12 months} | {measurement method} |
+
 ## Scope
 
 ### In scope

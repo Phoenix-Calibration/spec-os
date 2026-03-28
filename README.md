@@ -49,21 +49,52 @@ AI:  [implements NotificationDispatcher service]
      Next: T02
 ```
 
-## Quick Start
+## Installation
 
-**1. Install spec-os in your project**
+**Step 1 — Run the install script in your project**
 
+Linux / Mac (desde el directorio del proyecto):
+```bash
+curl -sSL https://raw.githubusercontent.com/Phoenix-Calibration/spec-os/main/scripts/install.sh | bash
+```
+
+Or targeting a specific path:
+```bash
+curl -sSL https://raw.githubusercontent.com/Phoenix-Calibration/spec-os/main/scripts/install.sh | bash -s -- /path/to/your-project
+```
+
+Windows (PowerShell — desde el directorio del proyecto):
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Phoenix-Calibration/spec-os/main/scripts/install.ps1" -OutFile install.ps1
+.\install.ps1
+Remove-Item install.ps1
+```
+
+Or targeting a specific path:
+```powershell
+.\install.ps1 -TargetDir C:\path\to\your-project
+```
+
+The script clones spec-os, copies all skills and agents into your project's `.claude/` folder, and cleans up automatically. Git must be installed and authenticated with GitHub.
+
+**Step 2 — Initialize in Claude Code**
+
+Open Claude Code in your project and run:
 ```text
 /spec-os-init
 ```
 
-That's it. spec-os detects whether you're starting from scratch or adopting in an existing project and creates the full structure.
+spec-os detects whether you're starting from scratch or adopting into an existing project and creates the full structure.
 
-**2. Configure your tracker**
+**Step 3 — Configure your tracker**
 
-Edit `spec-os/config.yaml` with your ADO or GitHub details.
+Edit `spec-os/tracker/config.yaml` with your ADO or GitHub details.
 
-**3. Start working**
+**Updating spec-os**
+
+Run `update.sh` / `update.ps1` (same syntax as install) from anywhere in your project. The script fetches the latest version and overwrites framework files — rename any customized skills before updating.
+
+**Start working**
 
 ```text
 /spec-os-brainstorm   — new idea or requirement
@@ -72,10 +103,10 @@ Edit `spec-os/config.yaml` with your ADO or GitHub details.
 
 ## Docs
 
-→ **[Getting Started](docs/getting-started.md)**: what spec-os creates and your first walkthrough
-→ **[Concepts](docs/concepts.md)**: the 4-layer architecture and key ideas
-→ **[Skills](docs/skills.md)**: reference for all `/spec-os-*` skills
-→ **[Workflows](docs/workflows.md)**: patterns for features, bugs, and cross-repo initiatives
+→ **[Getting Started](docs/Getting%20Started/01-overview.md)**: what spec-os is and how to install it
+→ **[Concepts](docs/Concepts/00-concepts-overview.md)**: the 4-layer architecture and key ideas
+→ **[Workflow](docs/Workflow/01-workflow-overview.md)**: the full flow — setup, design, implementation, maintenance
+→ **[Skills Reference](docs/Workflow/06-skills-reference.md)**: reference for all `/spec-os-*` skills
 
 ## Why spec-os?
 
@@ -88,21 +119,44 @@ AI coding assistants are powerful but lose context across sessions, duplicate tr
 
 ## Skills
 
+**Phase 0 — Project setup** *(run once)*
+
 | Skill | Purpose |
 |-------|---------|
+| `/spec-os-product` | Create product documentation (mission, roadmap, design) |
 | `/spec-os-init` | Install or adopt spec-os in a project |
-| `/spec-os-product` | Create product documentation (mission, roadmap) |
-| `/spec-os-brainstorm` | Analyze an idea → create `origin.md` |
-| `/spec-os-bug` | Analyze a bug → simple or complex path |
-| `/spec-os-create` | Write technical spec from `origin.md` |
-| `/spec-os-plan` | Decompose spec into User Stories and tasks |
-| `/spec-os-implement` | Execute one task (one session, one commit) |
-| `/spec-os-verify` | Quality gate per User Story |
-| `/spec-os-doc` | Update user documentation (conditional) |
-| `/spec-os-sync` | Sync lessons to knowledge base (always last) |
+| `/spec-os-tracker` | Set up and manage ADO or GitHub tracker integration |
 | `/spec-os-discover` | Extract coding standards from your codebase |
-| `/spec-os-inject` | Load relevant standards for the current task |
+
+**Phase 1 — Design** *(Team Lead / Product Owner, per feature)*
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-brainstorm` | Analyze an idea → create `origin.md` |
+| `/spec-os-design` | Write technical spec from `origin.md` |
+| `/spec-os-plan` | Decompose spec into User Stories and tasks |
+
+**Phase 2 — Implementation** *(Developer, per feature)*
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-implement` | Execute one task (one session, one commit) |
+| `/spec-os-verify` | Quality gate per User Story → PR |
+| `/spec-os-doc` | Update user documentation after verification |
+| `/spec-os-sync` | Sync lessons to knowledge base after PR |
+
+**Phase 3 — Framework quality** *(post-session)*
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-audit` | Capture framework quality signals for improvement |
+
+**Maintenance** *(as needed)*
+
+| Skill | Purpose |
+|-------|---------|
+| `/spec-os-bug` | Analyze a bug → simple or complex fix path |
 | `/spec-os-standard` | Update or create a standard |
+| `/spec-os-inject` | Load relevant standards for the current task |
 | `/spec-os-abandon` | Close a feature without completing it |
-| `/spec-os-prune` | Clean up outdated knowledge base entries |
-| `/spec-os-explore` | Analyze a cross-repo initiative (Claude Desktop) |
+| `/spec-os-clean` | Archive completed features, prune knowledge base |

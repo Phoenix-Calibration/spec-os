@@ -166,6 +166,9 @@ Lessons synced: {N}
 Lessons skipped (not generalizable): {N}
 Knowledge base:  spec-os/specs/knowledge-base.md updated
 Domain spec:     spec-os/specs/{domain}/spec.md {updated | skipped — no domain changes | skipped — developer declined}
+
+Tip: run /spec-os-audit {feature-id} to capture framework quality signals
+from this feature and contribute improvements back to spec-os.
 ```
 
 ---
