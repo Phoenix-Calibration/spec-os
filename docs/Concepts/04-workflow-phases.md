@@ -23,7 +23,7 @@ Owned by the **Team Lead or Product Owner**. Produces all artifacts the develope
 
 | Skill | Produces |
 |-------|----------|
-| `/spec-os-brainstorm` | `origin.md` — the permanent record of why |
+| `/spec-os-brainstorm` | `brief.md` — the permanent record of why |
 | `/spec-os-design` | `spec.md` — the behavior contract |
 | `/spec-os-plan` | `tasks.md` — the atomic execution plan + User Stories in tracker |
 

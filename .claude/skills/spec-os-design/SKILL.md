@@ -1,13 +1,13 @@
 ---
 name: spec-os-design
-description: Write the technical spec for a feature from origin.md. Use this skill when the developer runs /spec-os-design, is ready to turn a brainstormed idea into a formal specification, or when /spec-os-implement triggers Update mode during RECONCILE to record spec changes discovered during implementation.
+description: Write the technical spec for a feature from brief.md. Use this skill when the developer runs /spec-os-design, is ready to turn a brainstormed idea into a formal specification, or when /spec-os-implement triggers Update mode during RECONCILE to record spec changes discovered during implementation.
 ---
 
 # /spec-os-design
 
 ## Goal
 
-Transform `origin.md` into a formal `spec.md` — the observable behavior contract that drives implementation. Preserve all strategic reasoning from `origin.md` unchanged.
+Transform `brief.md` into a formal `spec.md` — the observable behavior contract that drives implementation. Preserve all strategic reasoning from `brief.md` unchanged.
 
 ## Syntax
 
@@ -17,7 +17,7 @@ Transform `origin.md` into a formal `spec.md` — the observable behavior contra
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `feature-id` | No | e.g. `F042` — auto-detected from most recent `origin.md` without `spec.md` if omitted |
+| `feature-id` | No | e.g. `F042` — auto-detected from most recent `brief.md` without `spec.md` if omitted |
 | `update` | No | Invoke Update mode — normally called by `/spec-os-implement` during RECONCILE |
 
 ---
@@ -34,11 +34,11 @@ Otherwise: auto-detect in Step 2 based on folder state.
 
 If `feature-id` provided: find matching folder in `spec-os/changes/` (folder name starts with `{feature-id}`).
 
-If not provided: scan `spec-os/changes/` for the most recent folder containing `origin.md` or `origin-*.md` files. Present to dev:
+If not provided: scan `spec-os/changes/` for the most recent folder containing `brief.md` or `origin-*.md` files. Present to dev:
 
 ```
 Found: spec-os/changes/{folder}/
-Feature: {id} — {title from origin.md}
+Feature: {id} — {title from brief.md}
 
 Proceeding with this feature? [y/n]
 ```
@@ -60,7 +60,7 @@ Wait for confirmation. Then detect mode based on folder state:
 Check if `spec-os/tracker/` exists. If yes: read `spec-os/tracker/config.yaml` to get tracker type, then read `spec-os/tracker/{type}.md` and apply the Tracker Resolution block. If `spec-os/tracker/` does not exist, skip tracker operations and continue.
 Operations used by this skill: get-feature, update-status
 
-Read `origin.md`. Extract `feature-id`, `tracker-type`, `tracker-url`. Fetch the Feature from the tracker. Extract: title, description, area path / labels.
+Read `brief.md`. Extract `feature-id`, `tracker-type`, `tracker-url`. Fetch the Feature from the tracker. Extract: title, description, area path / labels.
 
 ---
 
@@ -78,7 +78,7 @@ If docs/design/ not found:
 **Guard 2 — domain exists in _index.md:**
 ```
 Read spec-os/specs/_index.md.
-Read domain from origin.md (or ask developer if not present).
+Read domain from brief.md (or ask developer if not present).
 If domain not in _index.md:
   Stop. "Domain '{domain}' not found in spec-os/specs/_index.md.
   Run /spec-os-init update to add the domain first."
@@ -100,7 +100,7 @@ Read in parallel:
 - `docs/design/01-stack.md` — authoritative stack and available technologies (if exists)
 - `docs/design/05-data-model.md` — core entities and relationships (if exists; directly informs Domain model section of full specs)
 - `spec-os/specs/{domain}/spec.md` — domain spec, known entities and behaviors
-- `origin.md` (or all unincorporated `origin-*.md` in EXTEND mode) — pay particular attention to **Pending decisions** section
+- `brief.md` (or all unincorporated `origin-*.md` in EXTEND mode) — pay particular attention to **Pending decisions** section
 
 This context informs the scope boundaries, domain model, and design decision sections of `spec.md`.
 
@@ -144,9 +144,9 @@ Using context from Steps 3–6, draft `spec.md`. Use the template from `.claude/
 ```
 This is a complex spec (context-level 3). Invoke architect agent for Domain model and Design decisions sections? [y/n]
 ```
-If `y`: invoke `/spec-os-inject` with keywords: architecture patterns backend → get `standards-paths` (list of file paths). Then invoke `.claude/agents/architect` with: origin.md content, approved design context (00-overview, 01-stack, 05-data-model), pending decisions list, standards-paths (if available). Instruction: propose Domain model additions and Design decisions resolutions. Gate each section with developer before incorporating into the draft.
+If `y`: invoke `/spec-os-inject` with keywords: architecture patterns backend → get `standards-paths` (list of file paths). Then invoke `.claude/agents/architect` with: brief.md content, approved design context (00-overview, 01-stack, 05-data-model), pending decisions list, standards-paths (if available). Instruction: propose Domain model additions and Design decisions resolutions. Gate each section with developer before incorporating into the draft.
 
-**Pending decisions from origin.md:** resolve each one in the `## Design decisions` section of `spec.md`. Each resolution is permanent in the spec. Add a `## Resolution notes` entry in `origin.md` only if that section is currently empty.
+**Pending decisions from brief.md:** resolve each one in the `## Design decisions` section of `spec.md`. Each resolution is permanent in the spec. Add a `## Resolution notes` entry in `brief.md` only if that section is currently empty.
 
 **RFC 2119 in requirements:**
 - `MUST` / `SHALL` = absolute requirement — verify FAIL if not met
@@ -180,12 +180,12 @@ Create this spec? [y / n / edit]
 
 On approval, create both files in the feature folder:
 
-1. `spec.md` — the approved draft. Set frontmatter `sources: [origin.md]` to track which origin files have been incorporated.
+1. `spec.md` — the approved draft. Set frontmatter `sources: [brief.md]` to track which origin files have been incorporated.
 2. `spec-delta.md` — header only, empty body (ready for evolution tracking)
 
 Then invoke `update-status` on the tracker Feature to mark it as "Spec ready" (if tracker is configured).
 
-`origin.md` is **not modified**. Add `## Resolution notes` to it only if that section was empty and pending decisions existed.
+`brief.md` is **not modified**. Add `## Resolution notes` to it only if that section was empty and pending decisions existed.
 
 Note: `session-log.md` is created by `/spec-os-implement` at the start of its first session. `verify-report.md` is created by `qa-engineer` during `/spec-os-verify`. Each skill owns its own artifact.
 
@@ -344,8 +344,8 @@ If tasks are affected → `/spec-os-implement` will invoke `/spec-os-plan` Updat
 
 ## Rules
 
-- **Never invent requirements.** Only document what the Feature + `origin.md` + design context establish. If something is unclear, ask — don't assume.
-- **origin.md is immutable.** Never modify it except to fill an empty `## Resolution notes` section.
+- **Never invent requirements.** Only document what the Feature + `brief.md` + design context establish. If something is unclear, ask — don't assume.
+- **brief.md is immutable.** Never modify it except to fill an empty `## Resolution notes` section.
 - **Never write without approval.** Step 8 is mandatory. No exceptions.
 - **lite spec is not an incomplete spec.** It is deliberately scoped. Do not add Domain model sections to lite specs — that adds noise without adding verifiability.
 - **RFC 2119 discipline.** Every requirement sentence must use one keyword. No requirement without at least one scenario. No scenario without observable, verifiable outcomes.

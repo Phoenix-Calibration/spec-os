@@ -26,7 +26,6 @@ Framework: spec-os v1.0.0 (this repo IS the framework)
 ## This repo's structure
 
 - `docs/` — user-facing framework documentation (concepts, getting started, skills, workflows)
-- `master-plan/` — internal design documentation (source of truth for all decisions)
 - `.claude/skills/` — skill source files (SKILL.md per skill)
 - `Knowledge Base/` — reference frameworks analyzed during design (read-only)
 

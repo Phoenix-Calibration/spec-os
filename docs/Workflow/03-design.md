@@ -6,13 +6,13 @@ Owned by the **Team Lead or Product Owner**. Takes a raw idea to a fully specifi
 /spec-os-brainstorm ──► /spec-os-design ──► /spec-os-plan
 ```
 
-**Output:** `origin.md`, `spec.md`, `tasks.md` — everything the developer needs to start Phase 2.
+**Output:** `brief.md`, `spec.md`, `tasks.md` — everything the developer needs to start Phase 2.
 
 ---
 
 ## /spec-os-brainstorm
 
-Analyze an idea. Identify the real problem. Create `origin.md` and resolve the Feature in the tracker.
+Analyze an idea. Identify the real problem. Create `brief.md` and resolve the Feature in the tracker.
 
 ```text
 You: /spec-os-brainstorm
@@ -35,17 +35,17 @@ AI:  Real problem: operations has no visibility into status changes —
 You: y
 
 AI:  Created Feature F042 in ADO.
-     Created: spec-os/changes/F042-S24-equipment-notifications/origin.md
+     Created: spec-os/changes/F042-S24-equipment-notifications/brief.md
      Run /spec-os-design to continue.
 ```
 
-The `origin.md` it creates is **never modified** afterward — it's the permanent record of intent.
+The `brief.md` it creates is **never modified** afterward — it's the permanent record of intent.
 
 ---
 
 ## /spec-os-design
 
-Write the technical spec from `origin.md`. Translates "what and why" into a formal observable behavior contract.
+Write the technical spec from `brief.md`. Translates "what and why" into a formal observable behavior contract.
 
 ```text
 You: /spec-os-design

@@ -11,7 +11,7 @@ spec-level: lite | full
 spec-os-version: {version}
 created: {ISO-date}
 last-updated: {ISO-date}
-sources: [origin.md]
+sources: [brief.md]
 ---
 
 ## Tracker references

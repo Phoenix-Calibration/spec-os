@@ -11,7 +11,7 @@ The four-layer model that organizes everything in spec-os: Standards, Specs, Wor
 Coding conventions extracted from your codebase into indexed, discoverable files. Instead of hardcoding rules, spec-os loads only what each task actually needs.
 
 ### [Specs](03-specs.md)
-Observable system behavior documented in two places: a living source of truth per domain, and a per-feature folder that captures the work in progress. Includes key artifacts like `origin.md`, `spec.md`, and `spec-delta.md`.
+Observable system behavior documented in two places: a living source of truth per domain, and a per-feature folder that captures the work in progress. Includes key artifacts like `brief.md`, `spec.md`, and `spec-delta.md`.
 
 ### [Workflow Phases](04-workflow-phases.md)
 The skill chain organized into phases with distinct ownership. Covers Phase 1 (Design — Team Lead), Phase 2 (Implementation — Developer), approval gates, and the specialist subagents that execute tasks.

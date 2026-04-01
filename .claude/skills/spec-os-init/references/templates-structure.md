@@ -100,7 +100,7 @@ spec-os v1.0.0 is installed in this project.
 ## Workflow
 
 ### New feature
-1. `/spec-os-brainstorm` — analyze the idea, create origin.md
+1. `/spec-os-brainstorm` — analyze the idea, create brief.md
 2. `/spec-os-design` — write the technical spec
 3. `/spec-os-plan` — decompose into User Stories and tasks
 4. `/spec-os-implement T01` — execute one task per session

@@ -23,10 +23,10 @@ Complete reference for all `/spec-os-*` skills. For workflow patterns and when t
 
 | Skill | Purpose |
 |-------|---------|
-| `/spec-os-brainstorm` | Analyze an idea or requirement → create origin.md |
+| `/spec-os-brainstorm` | Analyze an idea or requirement → create brief.md |
 | `/spec-os-bug` | Analyze a bug → route to simple or complex path |
 | `/spec-os-init` | Initialize, adopt, or update spec-os in a project |
-| `/spec-os-create` | Create technical spec from origin.md |
+| `/spec-os-create` | Create technical spec from brief.md |
 | `/spec-os-plan` | Decompose spec into User Stories and tasks |
 | `/spec-os-implement` | Execute one task (one session) |
 | `/spec-os-verify` | Quality gate per User Story |
@@ -159,7 +159,7 @@ Analyze a business initiative or requirement that spans multiple applications. G
   - `{YYYYMMDD-HHmm}-initiative-{slug}-{app}.md` — one context package per affected app
 - Notifies developer to run `/spec-os-brainstorm` in each affected repo, passing the corresponding context package
 
-**Output files are not `origin.md`.** They are context packages — input for `/spec-os-brainstorm` in each project. Brainstorm does the deep per-project analysis and produces the authoritative `origin.md`.
+**Output files are not `brief.md`.** They are context packages — input for `/spec-os-brainstorm` in each project. Brainstorm does the deep per-project analysis and produces the authoritative `brief.md`.
 
 **Example:**
 ```
@@ -211,7 +211,7 @@ AI:  Created Epic E12: "Equipment data migration — ERP to Portal"
 
 ### `/spec-os-brainstorm`
 
-Analyze an idea or requirement, identify the real problem, and create `origin.md` as the strategic record.
+Analyze an idea or requirement, identify the real problem, and create `brief.md` as the strategic record.
 
 **Syntax:**
 ```
@@ -231,9 +231,9 @@ Analyze an idea or requirement, identify the real problem, and create `origin.md
 - Classifies the request (feature, maintenance, bug, spike)
 - Assigns a complexity signal (simple | medium | complex) — not Story Points
 - **Feature resolution:** searches tracker for an existing related Feature
-  - If found → proposes linking → dev confirms → `feature-id` stored in `origin.md`
-  - If not found → proposes creating a new Feature → dev confirms → creates it (title, description, area path — no SP) → `feature-id` stored in `origin.md`
-- Creates `origin.md` with full strategic context and resolved `feature-id`
+  - If found → proposes linking → dev confirms → `feature-id` stored in `brief.md`
+  - If not found → proposes creating a new Feature → dev confirms → creates it (title, description, area path — no SP) → `feature-id` stored in `brief.md`
+- Creates `brief.md` with full strategic context and resolved `feature-id`
 - Notifies developer and proposes handoff to `/spec-os-create`
 
 **SP is not estimated here.** Story Points are the exclusive responsibility of `/spec-os-plan`, which has the full spec and AC context needed to size accurately.
@@ -268,7 +268,7 @@ You: y
 
 AI:  Created Feature F042 in ADO.
 
-     Created: spec-os/changes/F042-S24-equipment-notifications/origin.md
+     Created: spec-os/changes/F042-S24-equipment-notifications/brief.md
 
      Ready to create the technical spec?
      Run /spec-os-create to continue.
@@ -277,7 +277,7 @@ AI:  Created Feature F042 in ADO.
 **Tips:**
 - Run from Claude Desktop (personal skill) — it's the entry point before any session
 - Also available as `~/.claude/skills/spec-os-brainstorm/` for cross-project use
-- The `origin.md` it creates is never modified or deleted — it's the permanent record of intent
+- The `brief.md` it creates is never modified or deleted — it's the permanent record of intent
 
 ---
 
@@ -404,7 +404,7 @@ AI:  Creating spec-os structure...
 
 ### `/spec-os-create`
 
-Create the technical specification for a feature, starting from `origin.md` or a tracker Feature ID.
+Create the technical specification for a feature, starting from `brief.md` or a tracker Feature ID.
 
 **Syntax:**
 ```
@@ -414,17 +414,17 @@ Create the technical specification for a feature, starting from `origin.md` or a
 **Arguments:**
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `feature-id` | No | Tracker Feature ID (reads from origin.md if not provided) |
+| `feature-id` | No | Tracker Feature ID (reads from brief.md if not provided) |
 
 **What it does:**
-- Reads `origin.md` from the changes folder (or asks for tracker Feature ID)
+- Reads `brief.md` from the changes folder (or asks for tracker Feature ID)
 - Reads tracker Feature via adapter (full context, AC, linked items)
 - Reads `docs/design/00-overview.md` + domain design file
 - **Guards:** validates `docs/design/` exists — stops if not found, instructs dev to run `/spec-os-product` first
 - **Guards:** validates domain exists in `spec-os/specs/_index.md` — stops if not found
 - **Guards:** checks for conflicts in `spec-os/changes/` (same feature already in progress)
 - Creates feature folder with: `spec.md`, `spec-delta.md` (empty), `session-log.md` (empty), `verify-report.md` (empty)
-- Preserves `origin.md` as-is
+- Preserves `brief.md` as-is
 - Notifies dev → proposes handoff to `/spec-os-plan`
 
 **Update mode** (invoked by `/spec-os-implement` during RECONCILE):
@@ -437,7 +437,7 @@ Create the technical specification for a feature, starting from `origin.md` or a
 ```
 You: /spec-os-create
 
-AI:  Reading origin.md from F042-S24-equipment-notifications/...
+AI:  Reading brief.md from F042-S24-equipment-notifications/...
      Reading Feature F042 from ADO...
      Reading docs/design/03-equipment-domain.md...
 

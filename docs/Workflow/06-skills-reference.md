@@ -22,8 +22,8 @@ Complete reference for all `/spec-os-*` skills. For workflow patterns and when t
 
 | Skill | Purpose |
 |-------|---------|
-| `/spec-os-brainstorm` | Analyze an idea → create `origin.md`, resolve Feature in tracker |
-| `/spec-os-design` | Write technical spec from `origin.md` |
+| `/spec-os-brainstorm` | Analyze an idea → create `brief.md`, resolve Feature in tracker |
+| `/spec-os-design` | Write technical spec from `brief.md` |
 | `/spec-os-plan` | Decompose spec into User Stories and atomic tasks |
 
 ### Phase 2 — Implementation skills *(Developer)*
@@ -203,7 +203,7 @@ Create and maintain product documentation. Runs before `/spec-os-init` so the fr
 
 ### `/spec-os-brainstorm`
 
-Analyze an idea or requirement. Identify the real problem. Resolve or create the Feature in the tracker. Create `origin.md`.
+Analyze an idea or requirement. Identify the real problem. Resolve or create the Feature in the tracker. Create `brief.md`.
 
 **Syntax:**
 ```text
@@ -222,9 +222,9 @@ Analyze an idea or requirement. Identify the real problem. Resolve or create the
 - Classifies: feature / maintenance / bug / spike
 - Sets `complexity: simple | medium | complex` (directional signal, not SP)
 - Searches tracker for an existing related Feature
-  - If found → proposes linking → dev confirms → `feature-id` stored in `origin.md`
+  - If found → proposes linking → dev confirms → `feature-id` stored in `brief.md`
   - If not found → proposes creating a new Feature → dev confirms → creates it → `feature-id` stored
-- Creates `origin.md` in `spec-os/changes/{folder}/`
+- Creates `brief.md` in `spec-os/changes/{folder}/`
 - Notifies dev → proposes handoff to `/spec-os-design`
 
 **Example:**
@@ -249,7 +249,7 @@ AI:  Real problem: operations has no visibility into status changes — they
 You: y
 
 AI:  Created Feature F042 in ADO.
-     Created: spec-os/changes/F042-S24-equipment-notifications/origin.md
+     Created: spec-os/changes/F042-S24-equipment-notifications/brief.md
 
      Ready to create the technical spec?
      Run /spec-os-design to continue.
@@ -257,7 +257,7 @@ AI:  Created Feature F042 in ADO.
 
 **Tips:**
 - Available as a personal skill (`~/.claude/skills/`) for use across projects
-- The `origin.md` it creates is never modified or deleted — it's the permanent record of intent
+- The `brief.md` it creates is never modified or deleted — it's the permanent record of intent
 - Story Points are NOT estimated here — that's `/spec-os-plan`'s responsibility
 
 ---
@@ -294,7 +294,7 @@ spec-os/changes/B1847-equipment-export-null/
 
 ### `/spec-os-design`
 
-Write the technical specification for a feature from `origin.md`. Translates the "what and why" from brainstorm into a formal observable behavior contract.
+Write the technical specification for a feature from `brief.md`. Translates the "what and why" from brainstorm into a formal observable behavior contract.
 
 **Syntax:**
 ```text
@@ -304,7 +304,7 @@ Write the technical specification for a feature from `origin.md`. Translates the
 **Arguments:**
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `feature-id` | No | e.g. `F042` — auto-detected from most recent `origin.md` without `spec.md` if omitted |
+| `feature-id` | No | e.g. `F042` — auto-detected from most recent `brief.md` without `spec.md` if omitted |
 
 **Guards (stops if not met):**
 - `docs/design/` must exist → run `/spec-os-product` first
@@ -312,10 +312,10 @@ Write the technical specification for a feature from `origin.md`. Translates the
 - No conflicting in-progress feature in same domain → warns dev, who decides
 
 **What it does:**
-- Reads `origin.md` + tracker Feature + `docs/design/00-overview.md` + domain spec
+- Reads `brief.md` + tracker Feature + `docs/design/00-overview.md` + domain spec
 - Determines `spec-level: lite | full` based on scope criteria (proposes to dev for confirmation)
 - Drafts `spec.md` with RFC 2119 requirements and Given/When/Then scenarios
-- Resolves pending decisions from `origin.md` in the Design decisions section
+- Resolves pending decisions from `brief.md` in the Design decisions section
 - Proposes full spec to dev for approval — never writes without confirmation
 - Creates 4 files: `spec.md` + empty `spec-delta.md` + empty `session-log.md` + empty `verify-report.md`
 
@@ -333,7 +333,7 @@ Proposes spec changes for dev approval → writes delta entry in `spec-delta.md`
 ```text
 You: /spec-os-design
 
-AI:  Found: spec-os/changes/F042-S24-equipment-notifications/origin.md
+AI:  Found: spec-os/changes/F042-S24-equipment-notifications/brief.md
      Spec-level: full (observable API contract + domain state changes)
      Confirm? [y / change]
 
@@ -406,7 +406,7 @@ spec-os/changes/{feature}/tasks.md
 Adjusts task scope/done-when, adds new tasks, or proposes US split. Dev approves before writing.
 
 **Tips:**
-- Story Points are set **exclusively** here — `origin.md` carries only `complexity` (directional, not SP)
+- Story Points are set **exclusively** here — `brief.md` carries only `complexity` (directional, not SP)
 - Always confirm the US list before task decomposition — rework at US level is expensive
 - `doc-impact: false` on all tasks means `/spec-os-doc` will never run for this feature
 
@@ -622,7 +622,7 @@ Capture framework quality signals after a session. Produces an entry in `spec-os
 
 **Modes:**
 - `context` — analyzes current session history
-- `analyze` — reads feature artifacts (origin.md, spec.md, session-log.md)
+- `analyze` — reads feature artifacts (brief.md, spec.md, session-log.md)
 - `feedback` — guided Q&A with the developer
 
 `audit-analyst` produces a structured draft. Dev approves before it's written to `audit-log.md`.

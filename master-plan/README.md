@@ -28,7 +28,7 @@ Read [04-templates.md](04-templates.md) and [06-skills-reference.md](06-skills-r
 | [01-context.md](01-context.md) | What is spec-os, 4 frameworks analyzed, strategic decision, DevCanvas preservation list | Orientation — read once |
 | [02-architecture.md](02-architecture.md) | 4-layer architecture, complete project file structure | Primary implementation reference |
 | [03-decisions.md](03-decisions.md) | 18 design decisions with rationale, 8 resolved gaps | Before implementing any skill |
-| [04-templates.md](04-templates.md) | File templates: config.yaml, index.yml, spec.md, tasks.md, session-log.md, spec-delta.md, origin.md, verify-report.md | Copy-paste reference |
+| [04-templates.md](04-templates.md) | File templates: config.yaml, index.yml, spec.md, tasks.md, session-log.md, spec-delta.md, brief.md, verify-report.md | Copy-paste reference |
 | [05-skills-chain.md](05-skills-chain.md) | Tracker adapter pattern, 3-tier context loading, skills inventory, full skill chain | Workflow reference |
 | [06-skills-reference.md](06-skills-reference.md) | Complete skill documentation: syntax, arguments, examples, tips | Day-to-day operational reference |
 | [07-roadmap.md](07-roadmap.md) | 5-phase implementation roadmap, DevCanvas vs spec-os comparison | Planning reference |

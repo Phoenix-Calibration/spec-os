@@ -291,7 +291,7 @@ Tasks updated. {n} task(s) modified. New US created: {yes — {US-id} | no}
 
 ## Rules
 
-- **SP is exclusive to this skill.** Never inherit `complexity` from `origin.md` as an SP value. Brainstorm signals direction; spec-plan sets the number.
+- **SP is exclusive to this skill.** Never inherit `complexity` from `brief.md` as an SP value. Brainstorm signals direction; spec-plan sets the number.
 - **User Stories before tasks.** Always get confirmation on the US list (Step 6) before decomposing into tasks. Rework at the task level is cheaper than rework at the US level.
 - **One layer per task.** A task spanning backend and frontend guarantees a mixed commit and breaks resume mode. Split it.
 - **claimed-by is always empty.** `/spec-os-implement` sets it at session start. Never pre-fill it.

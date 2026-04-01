@@ -70,7 +70,7 @@ TIER 3 (context-level: 3):
 | `/spec-os-discover` | spec-os-discover/ | NEW | Developer / `/spec-os-init` Adopt | Nothing |
 | `/spec-os-inject` | spec-os-inject/ | NEW | `/spec-os-implement` | Nothing (returns content) |
 | `/spec-os-standard` | spec-os-standard/ | NEW | Developer | Nothing |
-| `/spec-os-design` | spec-os-design/ | Updated (origin.md, spec-delta, Update mode) | Developer / `/spec-os-brainstorm` / `/spec-os-implement` | `/spec-os-plan` |
+| `/spec-os-design` | spec-os-design/ | Updated (brief.md, spec-delta, Update mode) | Developer / `/spec-os-brainstorm` / `/spec-os-implement` | `/spec-os-plan` |
 | `/spec-os-plan` | spec-os-plan/ | Updated (context-level, ux-impact, claimed-by, Update mode) | `/spec-os-design` / `/spec-os-implement` / Developer | `/spec-os-implement` |
 | `/spec-os-implement` | spec-os-implement/ | Updated (inner loop, resume, RECONCILE via spec-reconciler, unclaim mode) | `/spec-os-plan` / Developer | `/spec-os-design` Update, `/spec-os-plan` Update, `/spec-os-verify` (on US done) |
 | `/spec-os-verify` | spec-os-verify/ | Updated (verify-report, conditional doc, /spec-os-sync auto post-PR) | `/spec-os-implement` | `/spec-os-doc` (if doc-impact) / `/spec-os-sync` (automatic) / `/spec-os-implement` (if fail) |
@@ -109,7 +109,7 @@ TIER 3 (context-level: 3):
 [3 PROJECT ENTRY POINTS — per repo]
   /spec-os-brainstorm -> receives optional {timestamp}-initiative-{slug}-{app}.md as input
                       -> resolves Feature in tracker (search existing | create new — dev confirms)
-                      -> creates origin.md (with feature-id, complexity)
+                      -> creates brief.md (with feature-id, complexity)
                       -> notifies dev [HANDOFF to /spec-os-design — dev confirms]
   /spec-os-bug:
     SIMPLE: creates changes/B{ID}-{name}/ with minimal spec.md + tasks.md (T01 only)
@@ -119,14 +119,14 @@ TIER 3 (context-level: 3):
   /spec-os-init -> creates full spec-os structure + domain specs -> instructs dev (no handoff)
 
 /spec-os-design
-  reads origin.md (or asks for tracker ID)
+  reads brief.md (or asks for tracker ID)
   reads tracker Feature via adapter
   reads docs/design/00-overview.md + domain file
   validates docs/design/ exists (guard — stops if not found, instructs dev to run /spec-os-product first)
   validates domain exists in spec-os/specs/_index.md (guard — stops if not found)
   conflict check against spec-os/changes/
   creates: spec.md + spec-delta.md (empty) + session-log.md (empty) + verify-report.md (empty)
-  origin.md: preserved as-is
+  brief.md: preserved as-is
   -> /spec-os-plan [HANDOFF — dev confirms]
 
   UPDATE MODE (invoked by /spec-os-implement during RECONCILE):

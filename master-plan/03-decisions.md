@@ -76,12 +76,12 @@ TIER 3 (complex tasks, +20-40KB):
 
 ---
 
-### Decision 4: origin.md — Preserve Strategic Reasoning
+### Decision 4: brief.md — Preserve Strategic Reasoning
 
 **Problem:** `brainstorm-output.md` is deleted after `spec-create` — the "why we built this" is lost
-**Solution:** Rename to `origin.md`, keep it permanently in the feature folder. Never modified after creation.
+**Solution:** Rename to `brief.md`, keep it permanently in the feature folder. Never modified after creation.
 
-`origin.md` contains: original problem statement, real problem identified, proposed solution, classification, effort estimate, tracker context at time of analysis, pending decisions, resolution notes.
+`brief.md` contains: original problem statement, real problem identified, proposed solution, classification, effort estimate, tracker context at time of analysis, pending decisions, resolution notes.
 
 ---
 
@@ -295,15 +295,15 @@ Both Update modes are dev-assisted: they propose changes, dev approves before wr
 
 ### Decision 19: Brainstorm Owns Feature Resolution in Tracker — SP Owned Exclusively by spec-plan
 
-**Problem:** No skill was responsible for creating or linking a Feature in the tracker. The `feature-id` chain (origin.md → spec.md → tasks.md) could start empty if the Feature didn't exist yet, breaking the link when `/spec-os-plan` creates User Stories in ADO. Additionally, `/spec-os-brainstorm` estimated SP, creating a second estimation source that conflicted with `/spec-os-plan`'s authoritative sizing.
+**Problem:** No skill was responsible for creating or linking a Feature in the tracker. The `feature-id` chain (brief.md → spec.md → tasks.md) could start empty if the Feature didn't exist yet, breaking the link when `/spec-os-plan` creates User Stories in ADO. Additionally, `/spec-os-brainstorm` estimated SP, creating a second estimation source that conflicted with `/spec-os-plan`'s authoritative sizing.
 
 **Solution — Feature resolution:**
 
-`/spec-os-brainstorm` is responsible for resolving the tracker Feature before creating `origin.md`:
+`/spec-os-brainstorm` is responsible for resolving the tracker Feature before creating `brief.md`:
 
 1. Search for an existing Feature in ADO/GitHub related to the analyzed idea
-2. If found → propose linking to it → dev confirms → `feature-id` stored in `origin.md`
-3. If not found → propose creating a new Feature → dev confirms → create it → `feature-id` stored in `origin.md`
+2. If found → propose linking to it → dev confirms → `feature-id` stored in `brief.md`
+3. If not found → propose creating a new Feature → dev confirms → create it → `feature-id` stored in `brief.md`
 
 Feature created in ADO contains: title, description (real problem + proposed solution), area path (from config.yaml). No SP — Features do not carry Story Points in ADO.
 
@@ -311,10 +311,10 @@ Feature created in ADO contains: title, description (real problem + proposed sol
 
 Story Points are the exclusive responsibility of `/spec-os-plan`. It is the only skill with the full context needed to estimate accurately: complete `spec.md`, AC in Given/When/Then, sizing rules (1/2/3/5/8/13).
 
-`/spec-os-brainstorm` replaces `effort-estimate` with `complexity: simple | medium | complex` in `origin.md` — a non-binding directional signal, not a commitment.
+`/spec-os-brainstorm` replaces `effort-estimate` with `complexity: simple | medium | complex` in `brief.md` — a non-binding directional signal, not a commitment.
 
 ```yaml
-# origin.md — complexity signal only
+# brief.md — complexity signal only
 complexity: simple | medium | complex
 
 # tasks.md — authoritative SP, set by /spec-os-plan
@@ -322,7 +322,7 @@ complexity: simple | medium | complex
 SP: 5
 ```
 
-**Result:** `feature-id` is always populated in `origin.md` before `/spec-os-create` runs. SP has a single source of truth. No manual step required between brainstorm and create.
+**Result:** `feature-id` is always populated in `brief.md` before `/spec-os-create` runs. SP has a single source of truth. No manual step required between brainstorm and create.
 
 ---
 
@@ -355,7 +355,7 @@ Timestamp-first naming groups all files from the same session chronologically wh
 
 **Where files live:** Claude Desktop project files. Not in any individual repo.
 
-**Handoff:** Developer takes each `{timestamp}-initiative-{slug}-{app}.md` and passes it to the corresponding repo's `/spec-os-brainstorm`. Brainstorm uses it as additional context, does deep per-project analysis, resolves the Feature in ADO (under the Epic if one was created), and produces the authoritative `origin.md`.
+**Handoff:** Developer takes each `{timestamp}-initiative-{slug}-{app}.md` and passes it to the corresponding repo's `/spec-os-brainstorm`. Brainstorm uses it as additional context, does deep per-project analysis, resolves the Feature in ADO (under the Epic if one was created), and produces the authoritative `brief.md`.
 
 **ADO hierarchy this enables:**
 
@@ -369,7 +369,7 @@ Epic                ← spec-os-explore creates (optional — when initiative wa
 
 **Relationship to spec-os-brainstorm:**
 
-`spec-os-explore` outputs are *context packages*, not `origin.md`. The `{timestamp}-initiative-{slug}-{app}.md` files are input to brainstorm, which produces the authoritative `origin.md` per project. The two skills are complementary, not overlapping.
+`spec-os-explore` outputs are *context packages*, not `brief.md`. The `{timestamp}-initiative-{slug}-{app}.md` files are input to brainstorm, which produces the authoritative `brief.md` per project. The two skills are complementary, not overlapping.
 
 ---
 

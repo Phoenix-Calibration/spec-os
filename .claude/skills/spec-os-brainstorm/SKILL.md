@@ -1,7 +1,7 @@
 ---
 name: spec-os-brainstorm
 description: Analyze a business idea or requirement, identify the real problem, propose
-  a solution, resolve the Feature in the tracker, and produce origin.md. Use this
+  a solution, resolve the Feature in the tracker, and produce brief.md. Use this
   skill when the developer runs /spec-os-brainstorm, wants to start a new feature,
   or has received a context package from /spec-os-explore. Entry point for the feature
   lifecycle in a single project.
@@ -11,7 +11,7 @@ description: Analyze a business idea or requirement, identify the real problem, 
 
 ## Goal
 
-Turn a raw idea or requirement into a structured `origin.md` with a resolved tracker Feature. Identify the real problem behind the stated request, propose a solution with complexity classification, and give `/spec-os-design` the complete context it needs to write the spec.
+Turn a raw idea or requirement into a structured `brief.md` with a resolved tracker Feature. Identify the real problem behind the stated request, propose a solution with complexity classification, and give `/spec-os-design` the complete context it needs to write the spec.
 
 ## Syntax
 
@@ -60,7 +60,7 @@ Read in parallel:
 - `docs/mission.md` — product purpose and audience (if exists)
 - `docs/roadmap.md` — strategic roadmap for context (if exists)
 - `spec-os/specs/_index.md` — domain list, to identify which domain(s) this might affect
-- Recent `origin.md` files — glob: `spec-os/changes/*/origin.md` (read last 3 by modification date) — to spot related or overlapping work
+- Recent `brief.md` files — glob: `spec-os/changes/*/brief.md` (read last 3 by modification date) — to spot related or overlapping work
 
 ---
 
@@ -143,7 +143,7 @@ Store returned `feature-id` and `tracker-url` from the tracker response.
 After resolving the Feature (option a or b): add a comment using `add-comment`:
 > `"brainstorm analysis: {real problem summary} → {proposed solution summary} (complexity: {level})"`
 
-**On no Feature (c):** `feature-id: none` in origin.md.
+**On no Feature (c):** `feature-id: none` in brief.md.
 
 ---
 
@@ -160,9 +160,9 @@ If `feature-id` is set: check if a folder matching `F{id}-*` already exists in `
 **If folder does not exist (first requirement for this Feature):**
 - Folder name: `F{id}-{cadence}-{slug}/` where cadence is read from field `project.current-cadence` in `spec-os/config.yaml`
 - Create folder: `spec-os/changes/{folder}/`
-- File name: `origin.md`
+- File name: `brief.md`
 
-If `feature-id: none`: folder `{YYYYMMDD}-{slug}/`, file name: `origin.md`.
+If `feature-id: none`: folder `{YYYYMMDD}-{slug}/`, file name: `brief.md`.
 
 Write origin file using the template from `docs/master-plan/04-templates.md`:
 
@@ -214,7 +214,7 @@ Sprint/Milestone: {current cadence}
 Feature:  {feature-id} — {title}
 Tracker:  {URL | none}
 Folder:   spec-os/changes/{folder}/
-Created:  origin.md
+Created:  brief.md
 
 Complexity signal: {simple | medium | complex}
   (This is directional — Story Points set exclusively by /spec-os-plan)
@@ -230,10 +230,10 @@ If `skill-handoffs: explicit` (default): stop. Do not invoke `/spec-os-design` a
 
 ## Rules
 
-- **Complexity is not SP.** `origin.md` carries `complexity: simple | medium | complex` as a directional signal only. Never map it to Story Points directly — that is `/spec-os-plan`'s exclusive job (Decision 19).
-- **Feature resolution is mandatory.** `feature-id` must be populated in `origin.md` (or explicitly set to `none`) before handing off to `/spec-os-design`. A missing `feature-id` breaks the entire traceability chain.
+- **Complexity is not SP.** `brief.md` carries `complexity: simple | medium | complex` as a directional signal only. Never map it to Story Points directly — that is `/spec-os-plan`'s exclusive job (Decision 19).
+- **Feature resolution is mandatory.** `feature-id` must be populated in `brief.md` (or explicitly set to `none`) before handing off to `/spec-os-design`. A missing `feature-id` breaks the entire traceability chain.
 - **Real problem analysis is not optional.** The developer described a symptom. Your job is to find the underlying problem. If the stated request IS the real problem, say so explicitly — don't skip the analysis.
-- **Never create tasks.md or spec.md.** This skill creates only `origin.md`. All other artifacts are downstream.
+- **Never create tasks.md or spec.md.** This skill creates only `brief.md`. All other artifacts are downstream.
 - **Overlap check is non-blocking.** Potential overlap with an existing feature is a warning, not a stop. The developer decides whether to continue or merge.
 
 ---

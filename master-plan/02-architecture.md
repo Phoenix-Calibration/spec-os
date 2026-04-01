@@ -36,7 +36,7 @@ Combines OpenSpec's delta tracking with DevCanvas's technical depth.
 - `spec-os/specs/{domain}/spec.md` — source of truth for current system behavior
 - `spec-os/changes/{feature-folder}/` — in-progress work with full artifact set
 - `spec-delta.md` — formal tracking of spec evolution within a feature
-- `origin.md` — preserved brainstorm reasoning (never deleted)
+- `brief.md` — preserved brainstorm reasoning (never deleted)
 
 ### Layer 3: Workflow & Memory — How We Execute
 
@@ -97,7 +97,7 @@ New layer. Makes every skill tracker-agnostic.
 |   |
 |   +-- changes/                       <- LAYER 3: Work in progress
 |       +-- {feature-folder}/          <- F{ID}-{cadence}-{name}/ or B{ID}-{name}/ for bugs
-|       |   +-- origin.md              <- preserved brainstorm (never deleted, never modified)
+|       |   +-- brief.md               <- preserved brainstorm (never deleted, never modified)
 |       |   +-- spec.md                <- technical spec (owned by /spec-os-design)
 |       |   +-- spec-delta.md          <- formal spec evolution log (owned by /spec-os-design)
 |       |   +-- tasks.md               <- atomic execution plan (owned by /spec-os-plan)
@@ -122,8 +122,6 @@ New layer. Makes every skill tracker-agnostic.
     +-- agents/                        <- native Claude Code subagents (executors, not entry points)
     |   +-- backend-dev.md             <- YAML frontmatter + system prompt (tool-restricted)
     |   +-- frontend-dev.md            <- YAML frontmatter + system prompt (tool-restricted)
-    +-- shared/                        <- shared resources read dynamically by skills at runtime
-    |   +-- tracker-adapter.md         <- single source of truth for tracker MCP mappings
     +-- skills/
         +-- spec-os-product/           <- /spec-os-product (also ~/.claude/skills/)
         |   +-- SKILL.md

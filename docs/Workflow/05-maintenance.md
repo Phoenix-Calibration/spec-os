@@ -109,7 +109,7 @@ Capture framework quality signals after a session. Produces an entry in `spec-os
 
 ```text
 /spec-os-audit context    ← analyzes current session history
-/spec-os-audit analyze    ← reads feature artifacts (origin.md, spec.md, session-log.md)
+/spec-os-audit analyze    ← reads feature artifacts (brief.md, spec.md, session-log.md)
 /spec-os-audit feedback   ← guided Q&A with you
 ```
 

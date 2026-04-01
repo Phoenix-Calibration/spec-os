@@ -83,14 +83,14 @@ AI:  Analyzing...
 
      Classification: Feature | Effort: 5 SP
 
-     Created: spec-os/changes/F042-S24-equipment-notifications/origin.md
+     Created: spec-os/changes/F042-S24-equipment-notifications/brief.md
 
      Ready to create the technical spec?
      Run /spec-os-create to continue.
 
 You: /spec-os-create
 
-AI:  Reading origin.md...
+AI:  Reading brief.md...
      Reading Feature F042 from ADO...
      Reading docs/design/03-equipment-domain.md...
 
@@ -399,7 +399,7 @@ Standards in `spec-os/standards/` are only as current as the codebase. After maj
 
 ### Use `/spec-os-abandon` — don't delete manually
 
-If a feature is cancelled, run `/spec-os-abandon`. It updates tracker status, moves the folder to `changes/archive/`, and preserves `origin.md` for historical context. Deleting the folder manually leaves orphaned tracker items.
+If a feature is cancelled, run `/spec-os-abandon`. It updates tracker status, moves the folder to `changes/archive/`, and preserves `brief.md` for historical context. Deleting the folder manually leaves orphaned tracker items.
 
 ---
 
@@ -411,7 +411,7 @@ If a feature is cancelled, run `/spec-os-abandon`. It updates tracker status, mo
 | Bug from tracker | `/spec-os-bug [id]` |
 | Set up product docs (mission, roadmap, design) | `/spec-os-product` |
 | Install spec-os framework | `/spec-os-init` (after `/spec-os-product`) |
-| Create spec from origin.md | `/spec-os-create` |
+| Create spec from brief.md | `/spec-os-create` |
 | Decompose spec into tasks | `/spec-os-plan` |
 | Implement one task | `/spec-os-implement [task-id]` |
 | Resume interrupted task | `/spec-os-implement [same task-id]` |

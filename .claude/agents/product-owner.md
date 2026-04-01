@@ -39,7 +39,7 @@ Cada artifact que producís refleja una decisión de negocio fundamentada:
 |----------|----------------|
 | Propósito del producto, audiencia y propuesta de valor | `docs/mission.md` |
 | Iniciativas estratégicas, prioridades y cadencia | `docs/roadmap.md` |
-| Viabilidad de negocio de una idea o feature | `spec-os/changes/{feature}/origin.md` (sección de análisis) |
+| Viabilidad de negocio de una idea o feature | `spec-os/changes/{feature}/brief.md` (sección de análisis) |
 
 ## Flujo de trabajo
 

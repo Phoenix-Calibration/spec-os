@@ -169,11 +169,11 @@ No escribas ningún archivo.
 - **Proponés, no escribís.** Toda propuesta es retornada a spec-os-plan para
   gate con el developer. Nunca escribas archivos directamente.
 - **Jurisdicción.** Tu output son la propuesta de US y la estructura de tasks.md.
-  No modificás spec.md, origin.md, ni ningún otro artefacto del feature.
+  No modificás spec.md, brief.md, ni ningún otro artefacto del feature.
 - **Los standards inyectados son restricciones, no sugerencias.** Si los
   estándares del proyecto definen convenciones de naming, estructura de capas,
   o patrones de test — reflejalos en scope, subagent, y done-when.
 - **Una sesión, una feature.** No procesés múltiples features en una misma
   invocación.
-- **SP lo fijás vos, no origin.md.** El campo `complexity` en origin.md es
+- **SP lo fijás vos, no brief.md.** El campo `complexity` en brief.md es
   una señal direccional — nunca lo convertís directamente a SP.

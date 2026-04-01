@@ -30,7 +30,7 @@
 
 ### Phase 3 — Spec Lifecycle Layer
 
-1. Write `/spec-os-create` skill (origin.md, spec-delta.md, Update mode, domain guard against `_index.md`)
+1. Write `/spec-os-create` skill (brief.md, spec-delta.md, Update mode, domain guard against `_index.md`)
 2. Write `/spec-os-plan` skill (context-level, ux-impact, claimed-by, Update mode)
 
 **Deliverable:** Spec and plan evolution tracked and assisted. Strategic reasoning preserved.
@@ -73,7 +73,7 @@
 | Spec evolution | Invisible | spec-delta.md per session, tracked by /spec-os-create |
 | Plan evolution | No mechanism | /spec-os-plan Update mode, assisted |
 | knowledge-sync | After every task, ADO eager | After each US, lazy, always last |
-| brainstorm-output | Deleted | Preserved as origin.md forever |
+| brainstorm-output | Deleted | Preserved as brief.md forever |
 | Standards | In CLAUDE.md, stale | Separate standards/ with index.yml |
 | CLAUDE.md | Fat | Thin: identity + pointers |
 | Multi-tracker | Not supported | Native via config.yaml |

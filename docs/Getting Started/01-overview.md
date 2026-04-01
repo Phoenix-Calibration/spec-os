@@ -28,7 +28,7 @@ spec-os organizes the development workflow into four phases:
 Install spec-os, configure your tracker, and extract your coding standards from the existing codebase.
 
 **Phase 1 — Design** *(Team Lead / Product Owner, per feature)*
-Analyze the idea, write the spec, and decompose into tasks. Output is `origin.md`, `spec.md`, and `tasks.md` — everything the developer needs to start.
+Analyze the idea, write the spec, and decompose into tasks. Output is `brief.md`, `spec.md`, and `tasks.md` — everything the developer needs to start.
 
 **Phase 2 — Implementation** *(Developer, per feature)*
 Execute tasks one by one, each in one session with one atomic commit. Quality gate per User Story, then PR.

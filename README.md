@@ -26,11 +26,11 @@ AI:  Real problem: operators discover status changes reactively, after delays.
 
 You: y
 AI:  Created Feature F042 in ADO.
-     Created: spec-os/changes/F042-S24-equipment-notifications/origin.md
+     Created: spec-os/changes/F042-S24-equipment-notifications/brief.md
      Ready for /spec-os-create
 
 You: /spec-os-create
-AI:  Reading origin.md and Feature F042...
+AI:  Reading brief.md and Feature F042...
      Created: spec.md, spec-delta.md, session-log.md, verify-report.md
      Ready for /spec-os-plan
 
@@ -132,8 +132,8 @@ AI coding assistants are powerful but lose context across sessions, duplicate tr
 
 | Skill | Purpose |
 |-------|---------|
-| `/spec-os-brainstorm` | Analyze an idea → create `origin.md` |
-| `/spec-os-design` | Write technical spec from `origin.md` |
+| `/spec-os-brainstorm` | Analyze an idea → create `brief.md` |
+| `/spec-os-design` | Write technical spec from `brief.md` |
 | `/spec-os-plan` | Decompose spec into User Stories and tasks |
 
 **Phase 2 — Implementation** *(Developer, per feature)*

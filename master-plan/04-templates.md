@@ -280,7 +280,7 @@ Specific facts: file paths, registered services, discovered constraints.
 
 ---
 
-## spec-os/changes/{feature}/origin.md
+## spec-os/changes/{feature}/brief.md
 
 ```markdown
 ---

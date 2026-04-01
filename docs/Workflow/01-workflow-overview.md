@@ -15,7 +15,7 @@ PHASE 0 — Setup (once per project)
 
 PHASE 1 — Design (Team Lead / Product Owner, per feature)
 ══════════════════════════════════════════════════════════
-/spec-os-brainstorm  →  origin.md + Feature in tracker
+/spec-os-brainstorm  →  brief.md + Feature in tracker
 /spec-os-design      →  spec.md + spec-delta.md
 /spec-os-plan        →  tasks.md + User Stories in tracker
 
