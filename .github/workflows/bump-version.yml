@@ -19,7 +19,7 @@ jobs:
 
       - name: Bump patch version
         run: |
-          version=$(grep '^version:' VERSION.yaml | awk '{print $2}')
+          version=$(grep '^version:' VERSION.yaml | awk '{print $2}' | tr -d '\r')
           major=$(echo $version | cut -d. -f1)
           minor=$(echo $version | cut -d. -f2)
           patch=$(echo $version | cut -d. -f3)
