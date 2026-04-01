@@ -3,12 +3,15 @@ name: Bump patch version
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - VERSION  # avoid loop when this action commits
+
+permissions:
+  contents: write
 
 jobs:
   bump:
     runs-on: ubuntu-latest
+    # Skip if this push was made by the bot (prevents infinite loop)
+    if: github.actor != 'github-actions[bot]'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -16,17 +19,19 @@ jobs:
 
       - name: Bump patch version
         run: |
-          version=$(cat VERSION | tr -d '[:space:]')
+          version=$(grep '^version:' VERSION.yaml | awk '{print $2}')
           major=$(echo $version | cut -d. -f1)
           minor=$(echo $version | cut -d. -f2)
           patch=$(echo $version | cut -d. -f3)
-          new_patch=$((patch + 1))
-          echo "$major.$minor.$new_patch" > VERSION
+          new_version="$major.$minor.$((patch + 1))"
+          today=$(date -u +%Y-%m-%d)
+          printf "version: %s\nreleased: %s\n" "$new_version" "$today" > VERSION.yaml
 
-      - name: Commit updated VERSION
+      - name: Commit updated VERSION.yaml
         run: |
+          new_version=$(grep '^version:' VERSION.yaml | awk '{print $2}')
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add VERSION
-          git commit -m "chore: bump version to $(cat VERSION) [skip ci]"
+          git add VERSION.yaml
+          git commit -m "chore: bump version to $new_version [skip ci]"
           git push
