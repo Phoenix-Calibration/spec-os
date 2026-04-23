@@ -6,7 +6,7 @@ spec-os organizes the feature lifecycle into two phases with distinct ownership,
 
 ```
 PHASE 0 — Setup (once per project)
-PHASE 1 — Design (Team Lead / Product Owner, per feature)
+PHASE 1 — Design (per feature)
 PHASE 2 — Implementation (Developer, per feature)
 PHASE 3 — Framework quality (post-session)
 ```
@@ -15,7 +15,7 @@ This separation is intentional: a developer can start Phase 2 without knowing an
 
 ## Phase 1 — Design
 
-Owned by the **Team Lead or Product Owner**. Produces all artifacts the developer needs.
+Produces all artifacts the developer needs.
 
 ```
 /spec-os-brainstorm ──► /spec-os-design ──► /spec-os-plan
@@ -32,7 +32,8 @@ Owned by the **Team Lead or Product Owner**. Produces all artifacts the develope
 Owned by the **Developer**. Consumes `tasks.md` and executes.
 
 ```
-/spec-os-implement ──► /spec-os-verify ──► /spec-os-doc ──► /spec-os-sync
+/spec-os-implement ──► /spec-os-verify ──┬──► /spec-os-doc  (if doc-impact: true)
+                                         └──► /spec-os-sync  (automatic, post-PR)
 ```
 
 | Skill | Does |
@@ -40,11 +41,11 @@ Owned by the **Developer**. Consumes `tasks.md` and executes.
 | `/spec-os-implement` | Executes one task per session, one commit |
 | `/spec-os-verify` | Quality gate per User Story → creates PR |
 | `/spec-os-doc` | Updates user documentation (if `doc-impact: true`) |
-| `/spec-os-sync` | Syncs lessons to knowledge base |
+| `/spec-os-sync` | Syncs lessons to knowledge base + updates domain spec with completed behavior |
 
 ## Approval Gates
 
-Every skill-to-skill handoff requires developer confirmation by default (`skill-handoffs: explicit` in `config.yaml`). No skill passes to the next silently.
+Every skill-to-skill handoff requires developer confirmation by default (`skill-handoffs: explicit` in `config.yaml`). The sole exception is `/spec-os-sync`, which runs automatically post-PR (Decision 27).
 
 ```
 /spec-os-brainstorm  →  /spec-os-design      [dev confirms]
@@ -52,8 +53,7 @@ Every skill-to-skill handoff requires developer confirmation by default (`skill-
 /spec-os-plan        →  /spec-os-implement   [dev confirms]
 /spec-os-implement   →  /spec-os-verify      [dev confirms, on US complete]
 /spec-os-verify      →  /spec-os-doc         [dev confirms, if doc-impact]
-/spec-os-doc         →  /spec-os-sync        [dev confirms]
-/spec-os-verify      →  /spec-os-sync        [dev confirms, if no doc-impact]
+/spec-os-verify      →  /spec-os-sync        [automatic — always, post-PR]
 ```
 
 Set `skill-handoffs: auto` in `config.yaml` to relax this once you trust the workflow.
@@ -62,8 +62,8 @@ Set `skill-handoffs: auto` in `config.yaml` to relax this once you trust the wor
 
 `/spec-os-implement` does not write code directly. It delegates to a specialist subagent defined in `.claude/agents/`:
 
-- `backend-dev` — handles backend tasks (Read, Edit, Write, Bash, Grep, Glob)
-- `frontend-dev` — handles frontend tasks, with accessibility rules added
+- `backend-dev` — handles backend tasks (Read, Edit, Write, Bash, Grep, Glob, TodoWrite)
+- `frontend-dev` — handles frontend tasks (same tools), with i18n rule added (no hardcoded UI strings)
 
 Specialists are native Claude Code subagents with enforced tool restrictions. `/spec-os-implement` controls when to invoke them and what context to pass.
 
@@ -76,20 +76,20 @@ TIER 1 (always, ~1KB):
   CLAUDE.md identity section + task definition + spec.md frontmatter only
 
 TIER 2 (most tasks, +10-20KB):
-  Relevant standards via /spec-os-inject + domain spec + prior session log
+  Relevant standards via /spec-os-inject + domain spec + depends-on session entry (if set)
 
 TIER 3 (complex tasks, +20-40KB):
   Full spec.md + knowledge-base.md (filtered) + ADRs referenced in spec
 ```
 
-Tier 1 is for simple bug fixes. Tier 3 is for cross-repo API contracts and migrations. Default is Tier 2.
+Tier 1 is for lite specs (simple bug fixes and internal refactors with no behavior contract change). Tier 3 is for cross-repo API contracts, security/compliance, and high-ambiguity tasks. Default is Tier 2.
 
 ## Tracker Hierarchy
 
 spec-os maps to your tracker's work item hierarchy:
 
 ```
-Epic                ← /spec-os-explore creates (optional, cross-repo initiatives)
+Epic                ← /spec-os-explore creates (personal skill, optional, cross-repo initiatives)
   Feature           ← /spec-os-brainstorm creates (one per project)
     User Story      ← /spec-os-plan creates (one or more per feature)
       Task          ← /spec-os-implement executes (one per session)

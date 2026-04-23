@@ -13,13 +13,13 @@ spec-os organizes everything into four independent layers. Each layer has a clea
 |                             |                               |
 |                    LAYER 4: Tracker Adapter                 |
 |                    "With whom we coordinate"                |
-|                (ADO | GitHub | Linear | Jira)               |
+|                    (ADO | GitHub)                           |
 +-------------------------------------------------------------+
 ```
 
 ## Layer 1 — Standards: How We Build
 
-Coding conventions extracted from your codebase into indexed, discoverable files.
+Coding conventions extracted from your codebase or derived from design documents, stored in indexed, discoverable files.
 
 - `spec-os/standards/index.yml` — maps keywords to standard files
 - `spec-os/standards/{category}/{name}.md` — concise, declarative rules
@@ -45,7 +45,7 @@ Specs describe **observable behavior only** — inputs, outputs, states, and tra
 The skill chain organized into two phases with distinct ownership:
 
 ```
-PHASE 1 — Design (Team Lead / Product Owner)
+PHASE 1 — Design
 ─────────────────────────────────────────────
 /spec-os-brainstorm ──► /spec-os-design ──► /spec-os-plan
                                                    │
@@ -53,20 +53,21 @@ PHASE 1 — Design (Team Lead / Product Owner)
                                                    │
 PHASE 2 — Implementation (Developer)              ▼
 ─────────────────────────────────────────────────────────────────────
-/spec-os-implement ──► /spec-os-verify ──► /spec-os-doc ──► /spec-os-sync
+/spec-os-implement ──► /spec-os-verify ──┬──► /spec-os-doc  (if doc-impact: true)
+                                         └──► /spec-os-sync  (automatic, post-PR)
 ```
 
 → [Deep dive: Workflow Phases](04-workflow-phases.md)
 
 ## Layer 4 — Tracker Adapter: With Whom We Coordinate
 
-Every skill that needs tracker access reads `spec-os/tracker/config.yaml` to get the tracker type, then loads `spec-os/tracker/{type}.md` for the full adapter. Set up via `/spec-os-tracker`:
+Every skill that needs tracker access reads `spec-os/tracker/config.yaml` to get the tracker type, then loads `spec-os/tracker/{type}.md` for the full adapter. Set up via `/spec-os-tracker`. If `spec-os/tracker/` does not exist, skills continue in tracker-free mode — no configuration needed.
 
 ```
 spec-os/tracker/
-├── config.yaml     ← type: ado | github | none
-├── ado.md          ← ADO adapter (MCP mappings + env vars)
-└── github.md       ← GitHub adapter (MCP mappings + env vars)
+├── config.yaml     ← type: ado | github
+├── ado.md          ← ADO adapter (field mapping, state mapping, MCP operations)
+└── github.md       ← GitHub adapter (field mapping, state mapping, MCP operations)
 ```
 
 Skills call abstract operations (`create-feature`, `create-us`, `update-status`). The adapter resolves which MCP to call. Adding a new tracker means a new adapter file — zero skill changes.
@@ -74,7 +75,7 @@ Skills call abstract operations (`create-feature`, `create-us`, `update-status`)
 ## Philosophy
 
 ```
-→ developer-controlled  — you invoke each skill, nothing runs silently
+→ developer-controlled  — you invoke each skill; /spec-os-sync is the sole exception (runs automatically post-PR)
 → tracker-agnostic      — ADO, GitHub, or any supported tracker via config
 → standards as code     — conventions live in indexed files, not in prompts
 → spec before code      — observable behavior documented before implementation
