@@ -175,12 +175,16 @@ Created:
 
 Next steps:
   1. {if tracker declared} Run /spec-os-tracker to configure tracker access [confirm to proceed]
-  2. Run /spec-os-discover to create standards from your codebase and/or docs/design/
-  3. Fill spec-os/specs/{domain}/spec.md with known system behavior
-  4. When ready: /spec-os-brainstorm or /spec-os-bug
+  2. {if docs/mission.md not found} Run /spec-os-product to create mission.md and roadmap.md [confirm to proceed]
+  3. Run /spec-os-discover to create standards from your codebase and/or docs/design/
+  4. Fill spec-os/specs/{domain}/spec.md with known system behavior
+  5. When ready: /spec-os-brainstorm or /spec-os-bug
 ```
 
+Steps marked `[confirm to proceed]` are interactive — present them one at a time and wait for the developer's response before continuing to the next.
+
 If tracker was declared and developer confirms step 1: invoke `/spec-os-tracker` passing the declared tracker type as context.
+If `docs/mission.md` was not found (checked in I.1) and developer confirms step 2: invoke `/spec-os-product`.
 
 ---
 
@@ -283,7 +287,7 @@ In both cases, mark all content: `# STUB — review and complete with actual beh
 
 ### A.6 — Report
 
-Same as Initialize step I.7.
+Same as Initialize step I.7, with one difference: step 2 (`/spec-os-product`) is offered only if `docs/mission.md` was not found in A.1.
 
 ---
 
