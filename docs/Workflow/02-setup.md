@@ -53,9 +53,17 @@ AI:  Scope: all | Stack: dotnet + nextjs
 
 Replaces the stub files created by `/spec-os-init` with your actual conventions. Every proposal requires your approval before writing.
 
+After extracting standards, discover also checks `docs/design/` for unfilled stubs. If evidence was found during the scan, it will propose filling them:
+
+- `06-integrations.md` — from detected external dependencies
+- `07-error-handling.md` — from observed error handling patterns
+- `08-glossary.md` — from domain terms in code and specs
+
+Stubs with no evidence found are reported but left for manual completion.
+
 Run by category if you prefer: `/spec-os-discover backend`, `/spec-os-discover frontend`.
 
-**Output:** `spec-os/standards/` populated, `index.yml` updated
+**Output:** `spec-os/standards/` populated, `index.yml` updated, `docs/design/` stubs filled (where evidence exists)
 
 ## Adding a New Domain Later
 

@@ -142,7 +142,7 @@ AI:  spec-os v1.0.0 installed.
 ```
 
 **Tips:**
-- Run `/spec-os-product` first if you want `docs/mission.md` to seed the config description
+- Run `/spec-os-product` first for full product context — if you skip it, init will offer to invoke it at the end when `docs/mission.md` is missing
 - After init, run `/spec-os-discover` to replace standard stubs with your actual conventions
 - Use `update` mode to add domains as your project grows
 
@@ -528,6 +528,7 @@ Scan the codebase and extract real coding conventions into `spec-os/standards/` 
 
 **Tips:**
 - Run after `/spec-os-init` to replace stubs with actual conventions
+- Also fills `docs/design/` stubs (integrations, error-handling, glossary) when evidence is found in the codebase — no separate step needed
 - Re-run with a specific category after a major refactor
 - If the codebase has mixed patterns, use `/spec-os-standard` to record which one is canonical
 
@@ -661,6 +662,9 @@ Scans `spec-os/specs/knowledge-base.md` for obsolete, contradictory, or invalid-
 
 **Feature archival (`archive`):**
 Scans `spec-os/changes/` for folders with `status: done` or `status: abandoned`. Moves to `spec-os/archive/` — dev approves before any move.
+
+**Documentation debt scan:**
+Checks `docs/design/` for unfilled stubs (`TBD` markers). Reports them in the final summary with actionable next steps — run `/spec-os-discover` for code-inferable stubs, `/spec-os-product update` for product-decision stubs.
 
 ---
 

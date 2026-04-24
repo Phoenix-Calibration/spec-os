@@ -108,6 +108,23 @@ Operations used by this skill: get-feature, get-us, update-status
 
 ---
 
+## Step 5.6 — Documentation debt scan
+
+If `docs/design/` exists: scan for stub files that still contain `TBD` markers.
+
+Check these files:
+- `docs/design/03-performance.md`
+- `docs/design/04-metrics.md`
+- `docs/design/06-integrations.md`
+- `docs/design/07-error-handling.md`
+- `docs/design/08-glossary.md`
+
+Collect all unfilled stubs. Include in the final report (Step 9). Do not modify any file — report only.
+
+If `docs/design/` does not exist or all stubs are filled: omit this section from the report.
+
+---
+
 ## ARCHIVAL
 
 ### Step 6 — Find archival candidates
@@ -183,6 +200,13 @@ Archival:        {N} folders moved to spec-os/archive/
                  or: skipped
 
 spec-os/changes/ remaining: {N} active features
+
+Documentation debt:   (omit section if docs/design/ does not exist or all stubs are filled)
+  docs/design/06-integrations.md  → TBD  (run /spec-os-discover to fill from codebase)
+  docs/design/07-error-handling.md → TBD  (run /spec-os-discover to fill from codebase)
+  docs/design/03-performance.md   → TBD  (fill when load targets are defined)
+  docs/design/04-metrics.md       → TBD  (fill when KPIs are defined)
+  docs/design/08-glossary.md      → TBD  (run /spec-os-discover to fill from codebase)
 ```
 
 ---

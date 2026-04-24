@@ -136,6 +136,41 @@ After writing each file, add or update its entry in `spec-os/standards/index.yml
 
 ---
 
+## Step 4.5 — Fill docs/design/ stubs (if any)
+
+If `docs/design/` exists: check which stub files still contain `TBD` markers:
+- `docs/design/03-performance.md`
+- `docs/design/04-metrics.md`
+- `docs/design/06-integrations.md`
+- `docs/design/07-error-handling.md`
+- `docs/design/08-glossary.md`
+
+For each stub found, determine if evidence gathered in Steps 1–4 can fill it:
+
+| Stub file | Can fill if... |
+|---|---|
+| `06-integrations.md` | External dependencies found (package.json, .csproj, imports) |
+| `07-error-handling.md` | Error handling patterns found in codebase |
+| `08-glossary.md` | Domain terms identified in code, specs, or docs |
+| `03-performance.md` | Performance targets or SLAs found in docs/design/ |
+| `04-metrics.md` | KPIs or metrics found in docs/mission.md or roadmap.md |
+
+For each fillable stub, present proposal and gate with developer:
+
+```
+─────────────────────────────────────────────────
+Design stub: docs/design/{file}
+─────────────────────────────────────────────────
+{proposed content based on discovered evidence}
+─────────────────────────────────────────────────
+Write? [y / n / edit]
+```
+
+Write approved content. Add status header (`EXTRACTED` or `DESIGN-DERIVED`) matching the evidence source.
+Stubs with no available evidence: skip — list in Step 5 report as "no evidence found."
+
+---
+
 ## Step 5 — Report
 
 ```
@@ -145,6 +180,9 @@ Created:      {list of new files written}
 Updated:      {list of existing files updated}
 Not created:  {list skipped — no evidence found}
 Conflicts:    {inconsistencies surfaced — need developer resolution}
+
+Design stubs filled:    {list | none}
+Design stubs pending:   {list — no evidence found | none}
 
 Next: refine individual standards with /spec-os-standard
 ```

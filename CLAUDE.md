@@ -34,6 +34,8 @@ Framework: spec-os v1.0.0 (this repo IS the framework)
 This repo uses standard git workflow — no spec-os tracking for self-development.
 Design decisions are finalized in master-plan/03-decisions.md.
 
+After any change to a SKILL.md file, check whether the change affects user-facing behavior and update `docs/` accordingly. Review at minimum: `docs/Workflow/06-skills-reference.md` (skill descriptions), the relevant workflow doc (`02-setup.md`, `03-design.md`, `04-implement.md`, `05-maintenance.md`), and any Getting Started doc that covers the affected skill.
+
 ## Entry points
 
 - Phase 1 (Foundation): /spec-os-init skill

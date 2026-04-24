@@ -67,6 +67,8 @@ Maintenance for the knowledge layer. Run at sprint or release close — not part
 
 **Feature archival** — scans `spec-os/changes/` for completed or abandoned features. Moves to `spec-os/archive/` after your confirmation.
 
+**Documentation debt scan** — checks `docs/design/` for stub files that still contain `TBD` markers and reports them in the final summary with actionable next steps (run `/spec-os-discover` for stubs inferable from code, run `/spec-os-product update` for stubs that require product decisions).
+
 ```text
 You: /spec-os-clean
 ```
