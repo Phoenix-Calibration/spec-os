@@ -15,8 +15,6 @@ Top-level project files created by `/spec-os-init`.
 ## `spec-os/config.yaml`
 
 ```yaml
-spec-os-version: "1.0.0"
-
 project:
   name: {project-name}
   description: {one-sentence description}
@@ -54,8 +52,6 @@ Description: {one-sentence description}
 Stack: {stack}
 Tracker: see spec-os/tracker/
 Standards: spec-os/standards/index.yml
-Framework: spec-os v1.0.0
-
 ## Agent behavior (immutable rules)
 
 - Think before responding — analyze the full request first
@@ -86,8 +82,6 @@ Framework: spec-os v1.0.0
 
 ```markdown
 # Getting Started with spec-os
-
-spec-os v1.0.0 is installed in this project.
 
 ## Key files
 
