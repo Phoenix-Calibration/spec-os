@@ -92,7 +92,21 @@ Edit `spec-os/tracker/config.yaml` with your ADO or GitHub details.
 
 **Updating spec-os**
 
-Run `update.sh` / `update.ps1` (same syntax as install) from anywhere in your project. The script fetches the latest version and overwrites framework files — rename any customized skills before updating.
+Run the update script from your project directory. It shows your installed version vs the latest, and updates `spec-os/version` automatically.
+
+Linux / Mac:
+```bash
+curl -sSL https://raw.githubusercontent.com/Phoenix-Calibration/spec-os/main/scripts/update.sh | bash
+```
+
+Windows (PowerShell):
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Phoenix-Calibration/spec-os/main/scripts/update.ps1" -OutFile update.ps1
+.\update.ps1
+Remove-Item update.ps1
+```
+
+The script overwrites all framework files (skills and agents) — rename any customized files before updating.
 
 **Start working**
 
