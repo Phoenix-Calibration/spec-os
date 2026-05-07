@@ -7,6 +7,18 @@ Structural reference for `spec-os/standards/` files. Used by `/spec-os-discover`
 
 ---
 
+## Standard file structure
+
+Every standard file documents three layers per section:
+
+- **Current state** — what the codebase actually does today (extracted from code scans)
+- **Best practice** — what the rule should be (informed by fetched external sources)
+- **Migration path** — concrete steps to close the gap, with effort and risk notes
+
+This structure is mandatory. Never propose a standard that documents only best practices without also capturing current state and a migration path.
+
+---
+
 ## `spec-os/standards/index.yml`
 
 ```yaml
@@ -79,13 +91,63 @@ frontend:
 
 ## File naming
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Class naming
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Variable naming
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Database naming
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## API endpoint naming
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -129,14 +191,53 @@ Include feature ID and task ID in every commit message.
 
 ## Credentials
 
+### Current state
+
+### Best practice
 Never commit credentials, tokens, API keys, or secrets to any file.
 Always use environment variables or a secret management solution.
 
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Input validation
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Authentication
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Sensitive data handling
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -178,9 +279,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Layer structure
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Dependency rules
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Domain boundaries
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -195,9 +326,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Dependency injection
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Service patterns
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Handler patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -212,11 +373,51 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Unit test conventions
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Integration test conventions
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Coverage requirements
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Test naming
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -231,9 +432,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Exception strategy
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## API error responses
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Logging on errors
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -248,11 +479,51 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Async patterns
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Result<T> pattern
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## EF Core conventions
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## DI registration conventions
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -267,11 +538,51 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Type hints
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Async patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Pydantic usage
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Error handling
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -286,11 +597,51 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Module structure
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## ORM patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Inheritance patterns
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## View conventions
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -305,9 +656,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Component architecture
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Props conventions
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Composition patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -322,9 +703,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Local state
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Global state
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Server state
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -339,9 +750,39 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Component tests
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## E2E tests
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Test selectors
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -356,11 +797,51 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## App Router conventions
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Data fetching
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 
 ## Server vs Client components
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Routing patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```
 
 ---
@@ -375,7 +856,37 @@ verify-report.md: spec-os/changes/{feature}/verify-report.md
 
 ## Hook patterns
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Performance (memo, useMemo, useCallback)
 
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
+
 ## Component patterns
+
+### Current state
+
+### Best practice
+
+### Migration path
+Steps:
+1. 
+Effort: {low | medium | high}
+Risk: 
 ```

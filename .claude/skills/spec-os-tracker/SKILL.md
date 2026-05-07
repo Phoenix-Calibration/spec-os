@@ -183,11 +183,15 @@ Current tracker configuration:
 
 ### U.2 — Ask what to change
 
+Also check: if the adapter file (`spec-os/tracker/{type}.md`) exists but its `Project Context`
+section has empty fields or `{placeholder}` values, pre-select option 3 and note it.
+
 ```
 What would you like to update?
 1. Connection details (org URL, project name, repo name)
 2. Tracker type (switch from ado to github or vice versa)
-3. Both
+3. Complete Project Context (teams, iterations, defaults) {← suggested if placeholders found}
+4. Options 1 + 3 or 2 + 3
 ```
 
 ### U.3 — Collect new values
@@ -200,6 +204,25 @@ ADO project name [{current}]:
 Empty response = keep current value.
 
 If switching tracker type: create the new adapter file (`spec-os/tracker/{new-type}.md`) from reference template, and delete the old adapter file (`spec-os/tracker/{old-type}.md`).
+
+### U.3b — Complete Project Context (if option 3 selected)
+
+Fetch live data from the configured tracker MCP in parallel:
+- Teams list for the project
+- Current and upcoming iterations
+- Team defaults (default area path, iteration path, work item type)
+
+Propose populated values for each empty field in the adapter's `Project Context` section:
+```
+─────────────────────────────────────────────────
+Project Context — fetched from {tracker type} MCP
+─────────────────────────────────────────────────
+{populated fields with live values}
+─────────────────────────────────────────────────
+Write? [y / n / edit]
+```
+
+Wait for approval. Write updated adapter file.
 
 ### U.4 — Propose and write
 

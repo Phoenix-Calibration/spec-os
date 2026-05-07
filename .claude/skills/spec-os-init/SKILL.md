@@ -241,7 +241,13 @@ Wait for confirmation/edits.
 
 ### A.3 — Collect remaining configuration
 
-Same as Initialize steps I.2 and I.3 (tracker selection, cadence, and handoff note).
+Collect configuration in groups of at most 3 questions per turn, in this order:
+1. Stack confirmation (if not already resolved from docs/design/01-stack.md)
+2. Tracker type: `ado | github | none`
+3. Cadence format: `sprint | milestone | none`
+
+Never present more than 3 questions in a single turn. Wait for answers before presenting
+the next group. Then follow I.3 for tracker handoff note.
 
 ### A.4 — Propose structure
 
@@ -257,9 +263,16 @@ Same as Initialize step I.6 with two differences:
 
 **For `CLAUDE.md`:** if existing file found:
 1. Read it
-2. Propose the new thin template as a replacement
-3. Highlight what would be removed
-4. Wait for explicit approval before writing. On `n`: keep existing CLAUDE.md unchanged and continue.
+2. **Scan for legacy artifacts before proposing:**
+   - `.github/copilot-instructions.md` — check if file exists
+   - `IRepositoryWrapper` — grep for references in source files
+   - `[ApiController]` attribute — grep for controller-based patterns
+   If any found: do NOT incorporate these patterns or references into the new CLAUDE.md.
+   In the proposal header, explicitly note:
+   `Legacy artifacts detected: {list}. These are NOT included — spec-os replaces this workflow.`
+3. Propose the new thin template as a replacement
+4. Highlight what would be removed
+5. Wait for explicit approval before writing. On `n`: keep existing CLAUDE.md unchanged and continue.
 
 **For domain spec stubs:** offer architect consultation before writing:
 
@@ -356,6 +369,7 @@ Write `1.0.0` to `spec-os/version`.
 ## Rules
 
 - **Propose before creating.** Always show the full file list (step I.5 / A.4) and wait for an explicit "y" before writing any file. A partial install — where only some files were created — is harder to debug than no install at all.
+- **Max 3 questions per turn.** Never present more than 3 configuration questions in a single turn. Group related fields together; wait for answers before presenting the next group.
 - **Never overwrite CLAUDE.md without explicit approval.** In ADOPT mode the existing CLAUDE.md may contain rules the team depends on. Always read it, show the proposed replacement, and highlight what would be removed before touching it.
 - **Only create standard files for stacks in use.** Writing `dotnet.md` into a Next.js-only project adds noise to `/spec-os-inject` matches and creates false confidence. Stick to the stacks declared in the developer's answers — never create stubs for stacks not in use.
 - **Never write credentials to any config file.** Organization URLs and project names are safe; authentication tokens and PATs are not. Leave auth fields as `{placeholder}` with a comment pointing the developer to their secret management solution.

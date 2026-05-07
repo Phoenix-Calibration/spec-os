@@ -64,6 +64,11 @@ Invoke `.claude/agents/market-researcher` via Agent tool with:
 - Instruction: research the market, users, competitors, and value gaps for this
   project. Produce a complete draft of `docs/market-research.md` including
   the Measurable outcomes section with KPIs, baselines, and realistic targets.
+  **If web search quota is exhausted mid-research:** do NOT stop. Deliver all results
+  gathered so far. Clearly mark each incomplete section with
+  `> ⚠ INCOMPLETE — web search quota exhausted. Fill manually or re-run.`
+  Then return the partial output with a note: "Quota exhausted — resume in a new
+  session or continue with partial research."
 
 Present output to developer:
 
@@ -156,12 +161,30 @@ Read reference templates before invoking:
 If `spec-os/standards/` exists: read `spec-os/standards/index.yml`, load any standards
 relevant to product documentation or global conventions.
 
+**Integration boundary check (run before invoking product-owner):**
+Check product answers from I.1 and any available context for mentions of ERP systems,
+third-party platforms, or external integrations (Odoo, SAP, Salesforce, QuickBooks, etc.).
+If found, ask the developer:
+```
+Integration detected: {system name(s)}.
+Before generating mission/roadmap — what does {product} own vs what does {system} own?
+List the boundary explicitly (one bullet per external system).
+> _
+```
+Wait for response. Include the boundary statement in the product-owner invocation context.
+If no external systems detected: skip this check.
+
 Invoke `.claude/agents/product-owner` via Agent tool with:
 - Product answers from I.1
 - Content of `references/template-mission.md` and `references/template-roadmap.md`
 - Standards (if available)
+- Integration boundary statement (if collected above)
 - Instruction: draft `docs/mission.md` and `docs/roadmap.md` based on the product answers
   and the template structures. Propose — do not write files.
+  **Mandatory self-review before returning output:** check for (1) competitors missing or
+  conflated, (2) regulatory bodies correctly identified, (3) integration boundaries
+  correctly scoped, (4) KPIs present with baselines and targets, (5) market-specific
+  context present (not generic). Revise output based on findings before returning.
 
 Present output to developer:
 
@@ -299,6 +322,11 @@ Invoke `.claude/agents/market-researcher` via Agent tool with:
   project based on the codebase signals. Produce a complete draft of
   `docs/market-research.md` including the Measurable outcomes section with KPIs,
   baselines, and realistic targets.
+  **If web search quota is exhausted mid-research:** do NOT stop. Deliver all results
+  gathered so far. Clearly mark each incomplete section with
+  `> ⚠ INCOMPLETE — web search quota exhausted. Fill manually or re-run.`
+  Then return the partial output with a note: "Quota exhausted — resume in a new
+  session or continue with partial research."
 
 Gate with developer — same format as I.0.
 If accepted or edited: write `docs/market-research.md` immediately.
@@ -350,12 +378,36 @@ Do not modify any files. Return findings only.
 
 Read reference templates (`template-mission.md`, `template-roadmap.md`).
 
+**Integration boundary check (run before invoking product-owner):**
+Scan README.md content and Explore subagent findings for mentions of ERP systems,
+third-party platforms, or external integrations (Odoo, SAP, Salesforce, QuickBooks, etc.).
+If found, ask the developer:
+```
+Integration detected: {system name(s)}.
+Before generating mission/roadmap — what does {product} own vs what does {system} own?
+List the boundary explicitly (one bullet per external system).
+> _
+```
+Wait for response. Include the boundary statement in the product-owner invocation context.
+If no external systems detected: skip this check.
+
+**KPI artifact pass-through:** from Explore subagent findings, extract any named KPI
+artifacts (stored procedures with performance semantics, dashboard widgets, named metrics,
+report definitions). Include these explicitly in the product-owner context as:
+"Codebase KPI signals: {list}. Evaluate each as a candidate north-star metric."
+
 Invoke `.claude/agents/product-owner` via Agent tool with:
 - README.md content and any existing docs
 - Explore subagent findings (domain signals, product purpose inferred from codebase)
 - Templates content
+- Integration boundary statement (if collected above)
+- KPI artifact list (if found)
 - Instruction: derive and propose `docs/mission.md` and `docs/roadmap.md` from the
   codebase signals. Mark what is inferred vs confirmed. Propose — do not write files.
+  **Mandatory self-review before returning output:** check for (1) competitors missing or
+  conflated, (2) regulatory bodies correctly identified, (3) integration boundaries
+  correctly scoped, (4) KPIs present with baselines and targets, (5) market-specific
+  context present (not generic). Revise output based on findings before returning.
 
 Gate with developer — same format as I.3.
 
@@ -482,6 +534,29 @@ Apply? [y / n / edit]
 ```
 
 Wait for approval per section. Update `Last updated` date in each modified file.
+
+---
+
+## Progress tracking (all modes)
+
+After each approved deliverable is written, display a progress summary before proceeding:
+
+```
+Progress ({mode} mode):
+  ✓ {completed deliverable}
+  ✓ {completed deliverable}
+  ○ {next deliverable}  ← next
+  ○ {remaining...}
+
+Continue with next deliverable? [y / pause]
+```
+
+If the developer responds `pause`, or if the session is approaching context limits, offer:
+```
+Remaining deliverables: {list}
+To resume: run /spec-os-product {mode} — it will detect what is complete
+and continue from {next deliverable}.
+```
 
 ---
 

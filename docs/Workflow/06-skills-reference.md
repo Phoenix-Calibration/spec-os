@@ -522,8 +522,11 @@ Scan the codebase and extract real coding conventions into `spec-os/standards/` 
 **What it does:**
 - Reads `spec-os/standards/index.yml` to know which files to populate
 - Scans the codebase using grep and glob — naming patterns, commit format, layer structure, test conventions, error handling, stack-specific patterns
+- Fetches official external sources (framework docs, style guides, security standards) before proposing each standard — training data summaries are not accepted as a source
 - Surfaces inconsistencies rather than silently picking one pattern
+- Reports a confidence score (1–5) before proposing; does not propose below 4/5
 - Proposes each standard to the developer one at a time — never writes without approval
+- Each standard is structured in three layers: **Current state** (what the codebase does today), **Best practice** (informed by fetched sources), **Migration path** (concrete steps, effort, risk)
 - Updates `Status: STUB` to `Status: EXTRACTED — {date}` on approved files
 
 **Tips:**

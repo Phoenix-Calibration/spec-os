@@ -98,6 +98,34 @@ Also read any ADRs in `docs/design/adr/` relevant to the standard being populate
 
 ---
 
+## Step 2.5 — Research external sources (mandatory)
+
+Before proposing any standard, fetch authoritative external sources. Using training data
+summaries without fetching is a protocol violation — not an acceptable shortcut.
+
+For each standard in scope:
+1. Identify the 2–3 most authoritative sources (official language/framework docs,
+   recognized style guides, security standards bodies — e.g., Microsoft C# Guidelines,
+   OWASP Cheat Sheets, WCAG 2.1, RFC documents, framework official docs).
+2. WebFetch each source. Minimum: 2 URLs fetched, at least 1 official vendor/language doc.
+3. Evaluate confidence (1–5):
+   - 5/5: all key rules confirmed by fetched sources + real codebase files
+   - 4/5: most rules confirmed; minor gaps acknowledged
+   - 3/5 or below: significant gaps remain — do NOT propose yet; fetch more sources first
+
+Report before proceeding to Step 3:
+```
+External research — {standard name}
+  Sources fetched:   {list of URLs}
+  Confidence:        {N}/5
+  Gaps remaining:    {list | none}
+```
+
+If confidence is below 4/5: list what is unconfirmed and fetch additional sources before
+proceeding. Do not propose a standard with confidence below 4/5.
+
+---
+
 ## Step 3 — Propose one standard at a time
 
 For each standard file in scope, present the proposed content to the developer. Process each file individually — batching multiple proposals creates confusion about what is being approved. For the expected section structure of each standard file, read `references/templates-standards.md`.
@@ -105,6 +133,7 @@ For each standard file in scope, present the proposed content to the developer. 
 ```
 ─────────────────────────────────────────────────
 Standard: spec-os/standards/{category}/{file}.md
+Confidence: {N}/5 | Sources: {N} fetched | Gaps: {list | none}
 ─────────────────────────────────────────────────
 
 {full proposed content}
@@ -132,7 +161,7 @@ Write each approved file. Use a status header that reflects the evidence source:
 > Managed by: /spec-os-standard | Keywords: {comma-separated keywords}
 ```
 
-After writing each file, add or update its entry in `spec-os/standards/index.yml`.
+Immediately after writing each file — before proposing the next standard — add or update its entry in `spec-os/standards/index.yml`. This step is non-optional and must not be deferred to end-of-session or next session.
 
 ---
 
