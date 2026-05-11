@@ -28,6 +28,8 @@ Framework: spec-os v1.0.0 (this repo IS the framework)
 - `docs/` — user-facing framework documentation (concepts, getting started, skills, workflows)
 - `.claude/skills/` — skill source files (SKILL.md per skill)
 - `Knowledge Base/` — reference frameworks analyzed during design (read-only)
+- `prompts/` — maintainer-only prompts (not distributed to user projects)
+- `improvements-backlog.md` — tracks suggested improvements from user audit logs
 
 ## Development workflow
 

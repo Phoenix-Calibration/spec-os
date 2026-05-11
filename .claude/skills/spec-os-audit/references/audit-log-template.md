@@ -22,7 +22,7 @@ and open an issue or PR in the spec-os repo.
 ## Entry template
 
 ```markdown
-## Entry — {YYYY-MM-DD} — {mode: context | analyze | feedback}
+## Entry — {YYYY-MM-DD HH:MM} — {mode: context | analyze | feedback}
 
 > source: {context | feature: F{ID} | feedback}  |  topic: {brief description}
 
