@@ -41,12 +41,10 @@ For each entry found, extract:
 Skip entries that have no `### Suggested improvements` section or where
 the section is empty / contains only `{placeholder}` text.
 
-### Step 2 — Ask for project identifier
+### Step 2 — Determine source identifier
 
-Ask the user:
-> "¿Cuál es el identificador del proyecto fuente? (ej: my-app, proj-x)"
-
-Wait for the answer. Use it as `{project}` in the Source column.
+Use `{datetime} — {mode}` as the Source value (e.g. `2026-05-11 14:32 — context`).
+No project name is required. If an entry has no time (old format), use `00:00` as fallback.
 
 ### Step 3 — Read current backlog
 
@@ -67,7 +65,7 @@ Improvements to insert:
 
 | ID      | Source                  | Target               | Severity | Description          | Status  |
 |---------|-------------------------|----------------------|----------|----------------------|---------|
-| IMP-001 | 2026-05-11 14:32 / proj-x | skill: spec-os-audit | high     | {description}        | pending |
+| IMP-001 | 2026-05-11 14:32 — context | skill: spec-os-audit | high     | {description}        | pending |
 ...
 
 Insert into improvements-backlog.md? [y / n]
